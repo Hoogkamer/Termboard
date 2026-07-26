@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EU AI Act</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-sidebar: #f1f5f9;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border-color: #e2e8f0;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-sidebar: #111827;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --border-color: #334155;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --badge-bg: #312e81;
+      --badge-text: #c7d2fe;
+      --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Navbar */
+    .topbar {
+      height: 60px;
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 10;
+    }
+    .topbar-brand { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+    .topbar-controls { display: flex; align-items: center; gap: 12px; }
+    .search-box { position: relative; display: flex; align-items: center; }
+    .search-input {
+      padding: 8px 30px 8px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      width: 300px;
+      font-size: 0.9rem;
+      outline: none;
+      font-family: inherit;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-kbd {
+      position: absolute;
+      right: 10px;
+      font-size: 0.75rem;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--border-color);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .btn-action {
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .btn-action:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Main Container Layout */
+    .app-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 340px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header { padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-secondary); }
+    .view-toggle-group { display: flex; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 2px; gap: 2px; }
+    .btn-view-toggle { background: none; border: none; padding: 2px 8px; font-size: 0.75rem; font-family: inherit; border-radius: 4px; cursor: pointer; color: var(--text-secondary); }
+    .btn-view-toggle.active { background: var(--bg-secondary); color: var(--accent); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+    .type-filters { display: flex; gap: 4px; padding: 8px 16px; flex-wrap: wrap; border-bottom: 1px solid var(--border-color); }
+    .filter-chip {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .xfield-filters { display: flex; flex-direction: column; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--border-color); }
+    .xfield-filter-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .xfield-filter-label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+    .xfield-filter-select { flex: 1; padding: 4px; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); outline: none; }
+
+    .term-list { flex: 1; overflow-y: auto; list-style: none; }
+    .term-item {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s ease;
+    }
+    .term-item:hover { background: var(--bg-primary); }
+    .term-item.active { background: var(--bg-secondary); font-weight: 600; }
+    .term-item-name { font-size: 0.95rem; }
+    .type-badge {
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Taxonomy Tree View Styles */
+    .tree-container { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .tree-list { list-style: none; padding-left: 0; }
+    .tree-item { margin: 2px 0; }
+    .tree-row { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: background 0.15s; user-select: none; }
+    .tree-row:hover { background: var(--bg-primary); }
+    .tree-row.active { background: var(--bg-secondary); font-weight: 600; }
+    .tree-toggle { font-size: 0.75rem; width: 16px; text-align: center; color: var(--text-muted); }
+    .tree-label { flex: 1; font-size: 0.9rem; }
+    .tree-children { list-style: none; padding-left: 16px; border-left: 1px dashed var(--border-color); margin-left: 14px; }
+
+    /* Main Content Pane */
+    .content-pane {
+      flex: 1;
+      padding: 32px 48px;
+      overflow-y: auto;
+      background: var(--bg-primary);
+    }
+    .detail-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 32px;
+      box-shadow: var(--card-shadow);
+      max-width: 900px;
+      margin: 0 auto 24px auto;
+    }
+    .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .detail-title { font-size: 1.8rem; font-weight: 700; color: var(--text-primary); }
+    .card-actions { display: flex; gap: 8px; }
+    .btn-card-action {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+    .btn-card-action:hover { color: var(--accent); border-color: var(--accent); }
+
+    .breadcrumb { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb-sep { color: var(--text-muted); font-size: 0.75rem; }
+
+    .section-title { font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin: 24px 0 12px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
+    .subsection-title { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin: 12px 0 6px 0; }
+    
+    /* Definition clean text under title */
+    .definition-clean {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    .definition-clean a { color: #1867c0; font-weight: 500; text-decoration: none; border-bottom: 1px solid transparent; transition: all 0.2s ease; cursor: pointer; }
+    .definition-clean a:hover { color: #0d47a1; border-bottom-color: #0d47a1; }
+
+    .term-description {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      overflow-wrap: break-word;
+      word-break: break-word;
+      max-width: 100%;
+    }
+    .term-description img, .term-description table, .term-description pre {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    .term-description a { color: #1867c0; font-weight: 500; text-decoration: none; border-bottom: 1px solid transparent; transition: all 0.2s ease; cursor: pointer; }
+    .term-description a:hover { color: #0d47a1; border-bottom-color: #0d47a1; }
+
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 12px; }
+    .meta-card { background: var(--bg-primary); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border-color); }
+    .meta-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+    .meta-value { font-size: 0.9rem; font-weight: 500; color: var(--text-primary); margin-top: 4px; }
+
+    /* Sub-concepts Grid */
+    .subconcepts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .subconcept-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .subconcept-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transform: translateY(-1px);
+    }
+    .subconcept-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .subconcept-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .subconcept-arrow {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 1rem;
+      transition: transform 0.15s ease;
+    }
+    .subconcept-card:hover .subconcept-arrow {
+      transform: translateX(3px);
+    }
+    .subconcept-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Grouped Relations List */
+    .relations-group {
+      margin-bottom: 16px;
+    }
+    .relations-list {
+      list-style: none;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .relations-list li {
+      padding: 10px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      transition: border-color 0.15s ease;
+    }
+    .relations-list li:hover {
+      border-color: var(--accent);
+    }
+    .relations-list a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .relations-list a:hover {
+      text-decoration: underline;
+    }
+    .relation-pill {
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-style: italic;
+    }
+    .relation-dir-icon {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    .relation-desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      width: 100%;
+      margin-top: 2px;
+    }
+
+    /* Empty State Inline */
+    .section-empty {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 8px 0;
+    }
+
+    /* Empty state */
+    .empty-state { text-align: center; color: var(--text-muted); padding: 64px 0; }
+    .empty-state h3 { font-size: 1.3rem; margin-bottom: 8px; color: var(--text-secondary); }
+
+    /* Responsive 2-Screen Mobile Flow */
+    .btn-back { display: none; }
+    @media (max-width: 768px) {
+      .topbar {
+        padding: 8px 12px;
+        gap: 8px;
+        flex-wrap: wrap;
+        height: auto;
+      }
+      .topbar-brand { font-size: 1rem; width: 100%; justify-content: space-between; }
+      .topbar-controls { width: 100%; justify-content: space-between; }
+      .search-input { width: 100%; max-width: 160px; }
+      
+      .app-container { flex-direction: column; height: calc(100vh - 90px); position: relative; }
+      
+      /* Screen 1: Index / Search */
+      .sidebar {
+        width: 100%;
+        height: 100%;
+        border-right: none;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Screen 2: Content Details */
+      .content-pane {
+        width: 100%;
+        height: 100%;
+        padding: 12px;
+        display: none;
+      }
+
+      /* Mobile 2-Screen State toggle via body attribute */
+      body[data-mobile-screen="detail"] .sidebar { display: none; }
+      body[data-mobile-screen="detail"] .content-pane { display: block; }
+      body[data-mobile-screen="detail"] .btn-back { display: inline-flex; }
+
+      .detail-card { padding: 16px; border-radius: 6px; }
+      .detail-header { flex-direction: column; gap: 8px; }
+      .card-actions { width: 100%; justify-content: flex-start; }
+      .subconcepts-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Print styles */
+    @media print {
+      .topbar, .sidebar, .card-actions { display: none !important; }
+      .app-container { height: auto !important; overflow: visible !important; }
+      .content-pane { padding: 0 !important; overflow: visible !important; background: #fff !important; }
+      .detail-card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        margin-bottom: 32px !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body data-mobile-screen="index">
+  <header class="topbar">
+    <div class="topbar-brand">
+      <button id="btnBack" class="btn-action btn-back">← Back</button>
+      <span>EU AI Act</span>
+    </div>
+    <div class="topbar-controls">
+      <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search..." />
+        <span class="search-kbd">/</span>
+      </div>
+      <button id="btnPrint" class="btn-action">Print</button>
+      <button id="themeToggle" class="btn-action">Theme</button>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="view-toggle-group">
+          <button id="btnViewList" class="btn-view-toggle active">List</button>
+          <button id="btnViewTree" class="btn-view-toggle">Taxonomy</button>
+        </div>
+        <span id="termCount">0 terms</span>
+      </div>
+      <div id="typeFilters" class="type-filters"></div>
+      <div id="xFieldFilters" class="xfield-filters"></div>
+      <ul id="termList" class="term-list"></ul>
+      <div id="treeContainer" class="tree-container" style="display:none;"></div>
+    </aside>
+
+    <main class="content-pane" id="contentPane">
+      <div id="welcomeView" class="empty-state">
+        <h3>EU AI Act</h3>
+        <p>A detailed knowledge graph visualizing the European Union Artificial Intelligence Act. It maps the relationships between AI Providers, Deployers, and Regulators, illustrating the workflows for High-Risk AI classification, General Purpose AI (GPAI) obligations, Conformity Assessments, and Fundamental Rights protections.</p>
+      </div>
+      <div id="detailView" style="display:none;"></div>
+    </main>
+  </div>
+
+  <script type="application/json" id="glossary-data">[{"id":"4c9afdb6-e758-e4a5-f2f7-51449d06c36e","name":"Accuracy & Cybersecurity","type":"policy","description":"Requirements for robustness, accuracy, and resilience to attacks","additionalInformation":"\u003cp>\u003cstrong>Article 15 - Accuracy, robustness, and cybersecurity\u003c/strong>\u003c/p>\u003cp>High-risk AI systems must:\u003c/p>\u003cul>\u003cli>Achieve appropriate levels of \u003cstrong>accuracy, robustness, and cybersecurity\u003c/strong>\u003c/li>\u003cli>Perform consistently throughout their lifecycle\u003c/li>\u003cli>Be resilient to errors, faults, and attempts to alter use or performance by malicious third parties\u003c/li>\u003c/ul>\u003cp>Technical solutions may include redundancy, fail-safe mechanisms, and security-by-design.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 15"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"2e5b7702-5a77-d9b8-7163-f1acabcb5771","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"must_ensure","targetId":"4c9afdb6-e758-e4a5-f2f7-51449d06c36e","targetName":"Accuracy & Cybersecurity","description":"Robustness standards"}]},{"id":"893b5730-2fd4-bea4-addb-23bfff6b33b8","name":"Adversarial Testing","type":"policy","description":"Model evaluation to identify vulnerabilities and systemic risks","additionalInformation":"\u003cp>\u003cstrong>Article 55(1)(b) - Red teaming\u003c/strong>\u003c/p>\u003cp>Providers of GPAI models with systemic risk must:\u003c/p>\u003cul>\u003cli>Perform model evaluation including \u003cstrong>adversarial testing\u003c/strong>\u003c/li>\u003cli>Conduct testing in accordance with state of the art\u003c/li>\u003cli>Document and report results to the AI Office\u003c/li>\u003c/ul>\u003cp>Goal: Identify and mitigate systemic risks.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 55(1)(b)"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"f6f57a66-6abf-6c1b-48d8-2aa576b1d944","sourceId":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","sourceName":"GPAI with Systemic Risk","relationName":"requires","targetId":"893b5730-2fd4-bea4-addb-23bfff6b33b8","targetName":"Adversarial Testing","description":"Mandatory stress tests"}]},{"id":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","name":"AI Deployer","type":"controller","description":"Natural or legal person using an AI system under its authority","additionalInformation":"\u003cp>\u003cstrong>Article 3(4) - Definition\u003c/strong>\u003c/p>\u003cp>A natural or legal person that \u003cstrong>uses\u003c/strong> an AI system under their authority, except where used for personal non-professional activity.\u003c/p>\u003cp>Deployers have specific obligations including:\u003c/p>\u003cul>\u003cli>Using systems according to instructions\u003c/li>\u003cli>Ensuring human oversight\u003c/li>\u003cli>Monitoring operation\u003c/li>\u003cli>Performing FRIA where required\u003c/li>\u003cli>Informing affected persons\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(4)"}],"relations":[{"id":"025052ab-5b2a-609c-7845-08ee86baccd4","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"must_ensure","targetId":"c08eb570-1dcf-6eb1-134b-32333b495515","targetName":"Interaction Disclosure","description":"Informing users during AI interaction"},{"id":"0ca6a9b0-54fe-476f-7917-c185217385c6","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"must_ensure","targetId":"87eda482-7896-7cc1-b779-bc43455635d8","targetName":"Human Oversight","description":"Operational supervision"},{"id":"301b81a9-9c61-844d-3e23-825ede81f624","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"must_inform","targetId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","targetName":"Natural Person","description":"Duty to notify when using chatbots or emotion recognition"},{"id":"4e129d9d-4ae9-eecf-9273-4f816efae471","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"provides","targetId":"b782c4bc-7e22-4b00-d70a-c715bc35f182","targetName":"Decision Explanation","description":"Contextual explanation for significant AI-assisted decisions"},{"id":"966a90fd-a6a1-b807-106e-88ee309f0b57","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"must_ensure","targetId":"90bef3fd-3f46-e948-800b-605bfbe48dc1","targetName":"AI Literacy","description":"Deployers must ensure their staff understand AI system operation"},{"id":"cf7c9eae-dde8-1bf0-1a7b-0db7a62fc4f5","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"must_perform","targetId":"16c9bf31-e020-1806-8e44-4752ac9f07a6","targetName":"FRIA (Art. 27)","description":"Pre-deployment assessment"}]},{"id":"90bef3fd-3f46-e948-800b-605bfbe48dc1","name":"AI Literacy","type":"policy","description":"Obligation to ensure staff have sufficient AI knowledge and skills","additionalInformation":"\u003cp>\u003cstrong>Article 4 - AI Literacy\u003c/strong>\u003c/p>\u003cp>Providers and deployers must take measures to ensure \u003cstrong>sufficient level of AI literacy\u003c/strong> of their staff and other persons dealing with AI systems on their behalf.\u003c/p>\u003cp>Taking into account:\u003c/p>\u003cul>\u003cli>Technical knowledge\u003c/li>\u003cli>Experience and education\u003c/li>\u003cli>Context of use\u003c/li>\u003cli>Persons affected\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 4"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"0c84b405-b8b3-79b2-050c-9bb4a961bdfe","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"must_ensure","targetId":"90bef3fd-3f46-e948-800b-605bfbe48dc1","targetName":"AI Literacy","description":"Providers and deployers must ensure adequate AI literacy training for staff"},{"id":"966a90fd-a6a1-b807-106e-88ee309f0b57","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"must_ensure","targetId":"90bef3fd-3f46-e948-800b-605bfbe48dc1","targetName":"AI Literacy","description":"Deployers must ensure their staff understand AI system operation"}]},{"id":"6a4e299a-2ecc-17c5-af32-6c0cd795992e","name":"AI Model","type":"term","description":"Trained computational system designed to generate outputs for inference","additionalInformation":"","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(66)"}],"relations":[{"id":"075670d3-0a48-5db4-b6bc-4eb8f61cc3ba","sourceId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","sourceName":"High-Risk AI System","relationName":"incorporates","targetId":"6a4e299a-2ecc-17c5-af32-6c0cd795992e","targetName":"AI Model","description":"High-risk systems are built upon one or more AI models"},{"id":"c8ea9085-9e97-f49c-8603-bae6bd8586cd","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"develops","targetId":"6a4e299a-2ecc-17c5-af32-6c0cd795992e","targetName":"AI Model","description":"Providers create or commission the underlying model"},{"id":"f07c236e-277f-c571-c09b-628b58c1e686","sourceId":"5dc8fde1-81c9-0bb0-8164-c5d339b727de","sourceName":"GPAI Model","relationName":"is_a","targetId":"6a4e299a-2ecc-17c5-af32-6c0cd795992e","targetName":"AI Model","description":"General-purpose AI is a specialization of AI model"}]},{"id":"ad293abc-4145-bd84-bccd-7c6573a232c1","name":"AI Provider","type":"controller","description":"Natural or legal person that develops or has an AI system developed","additionalInformation":"\u003cp>\u003cstrong>Article 3(2) - Definition\u003c/strong>\u003c/p>\u003cp>A natural or legal person that:\u003c/p>\u003cul>\u003cli>Develops an AI system (or has it developed)\u003c/li>\u003cli>Places it on the market or puts it into service under their own name or trademark\u003c/li>\u003c/ul>\u003cp>Whether for payment or free of charge. Has primary responsibility for compliance with all provider obligations.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(2)"}],"relations":[{"id":"0c84b405-b8b3-79b2-050c-9bb4a961bdfe","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"must_ensure","targetId":"90bef3fd-3f46-e948-800b-605bfbe48dc1","targetName":"AI Literacy","description":"Providers and deployers must ensure adequate AI literacy training for staff"},{"id":"1bc67fc6-16a3-4942-b35b-d65ad5142160","sourceId":"b15ca22c-8937-de43-78cc-247c06d1b643","sourceName":"Corrective Action","relationName":"performed_by","targetId":"ad293abc-4145-bd84-bccd-7c6573a232c1","targetName":"AI Provider","description":"The entity executing the fix"},{"id":"2e5b7702-5a77-d9b8-7163-f1acabcb5771","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"must_ensure","targetId":"4c9afdb6-e758-e4a5-f2f7-51449d06c36e","targetName":"Accuracy & Cybersecurity","description":"Robustness standards"},{"id":"3de7ffcb-b2c8-51f2-307a-a4eb44dd1874","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"must_provide","targetId":"300a994b-1be2-8e25-1d61-420916dee01e","targetName":"Instructions for Use","description":"Info for the deployer"},{"id":"5e00b6dc-c3e5-277a-f28d-8f8fd1f97c67","sourceId":"3fe62d55-1308-4180-89a2-c641bf502a15","sourceName":"Downstream Info (Annex XII)","relationName":"supplied_to","targetId":"ad293abc-4145-bd84-bccd-7c6573a232c1","targetName":"AI Provider","description":"Enabling system provider's compliance"},{"id":"7636e128-6f33-4fe7-87ed-96f64e34d760","sourceId":"081b3878-1251-128e-514d-bd729ea0a7bd","sourceName":"Authorized Representative","relationName":"bears_legal_liability_for","targetId":"ad293abc-4145-bd84-bccd-7c6573a232c1","targetName":"AI Provider","description":"Statutory enforcement target for non-EU providers"},{"id":"92a14279-89a7-1d0c-61e0-9ae4a115b78e","sourceId":"075fdce9-eb7f-9e6c-a563-1051bb26c2ad","sourceName":"Product Manufacturer","relationName":"assumes_role_of","targetId":"ad293abc-4145-bd84-bccd-7c6573a232c1","targetName":"AI Provider","description":"When integrating AI into a product, manufacturer takes on provider obligations"},{"id":"9fc67355-c7e4-59e5-fced-0a1cbc79ce93","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"must_ensure","targetId":"1d471761-94f4-715b-ba40-6313bedfffdf","targetName":"Synthetic Content Labeling","description":"Labeling synthetic content unless exception applies"},{"id":"9fde4c8e-675b-41bb-83eb-4fe3b92f0476","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"signs","targetId":"728ed521-6afe-7438-2b7a-ee6acf712ac9","targetName":"Declaration of Conformity","description":"The provider accepts full responsibility by signing"},{"id":"a4e964f3-2bfc-9a88-81eb-872c9a3a0402","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"establishes","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"Mandatory framework for internal compliance"},{"id":"a52dbecd-8642-5a67-2f72-8f7d7a2ff0a8","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"issues","targetId":"d8d7e926-e1f0-09d4-7fb4-d1677dbdeecc","targetName":"Compliance Mandate","description":"Mandatory for providers outside the EU"},{"id":"a99a95d0-6eae-db4c-4db6-33f9f8a16600","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"performs","targetId":"01e3c32f-8996-b78f-94d9-36633d8f067d","targetName":"Registration (Art. 49)","description":"Database entry"},{"id":"aad6e6c3-9d31-5ba6-59b3-efe547931998","sourceId":"d87d4dc1-ca36-cda8-ed26-3e72f70e003e","sourceName":"EU Anchor","relationName":"represents","targetId":"ad293abc-4145-bd84-bccd-7c6573a232c1","targetName":"AI Provider","description":"Bridge for non-EU entities"},{"id":"c8ea9085-9e97-f49c-8603-bae6bd8586cd","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"develops","targetId":"6a4e299a-2ecc-17c5-af32-6c0cd795992e","targetName":"AI Model","description":"Providers create or commission the underlying model"}]},{"id":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","name":"Annex III Categories","type":"term","description":"The definitive list of high-risk use cases defined in the Act","additionalInformation":"","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Annex III"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"0c01dfbe-9c6c-0510-f369-9af0633e02ec","sourceId":"f23ebc95-b8b2-e1fa-2dc9-ffc3c009af70","sourceName":"Annex III: Justice","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 8 of the list"},{"id":"142011c1-c579-4428-f35c-025f89047851","sourceId":"38e97f82-de01-c3dd-d873-fc2bb4e16d5d","sourceName":"Annex III: Critical Infrastructure","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 2 of the list"},{"id":"1dfb5da0-0f75-4ec3-831b-45ebc73aba17","sourceId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","sourceName":"Annex III Categories","relationName":"evaluates_against","targetId":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","targetName":"Art 6(3) Exception","description":"The entire list is eligible for the exception check"},{"id":"21ad11f8-9f7a-883b-d710-c8cf6eabc53c","sourceId":"e4aad613-1d6f-77f2-9758-d13b0cc9fd98","sourceName":"Annex III: Essential Services","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 5 of the list"},{"id":"43faecdd-ea32-4fe0-8d93-17ee8d635b11","sourceId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","sourceName":"Annex III Categories","relationName":"applies_to","targetId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","targetName":"High-Risk AI System","description":"Designates systems as high-risk"},{"id":"534db2fd-cfae-6b95-080d-5e3ebae38663","sourceId":"a80e2721-4f45-5b5e-1c2b-98c7b3f5c434","sourceName":"Annex III: Employment","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 4 of the list"},{"id":"622e1a31-8af4-ff3a-cb3b-3bad27c8f64b","sourceId":"14e49b2d-be9f-1af0-593a-77c4ba534f02","sourceName":"Annex III: Biometrics","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 1 of the list"},{"id":"660d72a6-641f-4dff-94a4-6fd5f08f39d0","sourceId":"eea0bfec-acba-3846-f4be-ae04f0970a62","sourceName":"Annex III: Migration","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 7 of the list"},{"id":"75d6277e-2ba3-1c12-50ea-07a01fad6cf2","sourceId":"f4a5abfb-ca69-91f0-45ab-10f331fd3192","sourceName":"Emotion Recognition","relationName":"applies_to","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Emotion recognition in workplace or education is high-risk"},{"id":"a10d4717-06ab-c675-4ed5-fd0e85842d29","sourceId":"f9c0bb23-e629-ba57-8fdf-dafc0f8fba63","sourceName":"Annex III: Law Enforcement","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 6 of the list"},{"id":"a8b1bc65-7d3c-ab43-2720-017edc270459","sourceId":"2e231e7b-c3d2-6eef-4e23-b61c4ebb3332","sourceName":"Annex III: Education","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 3 of the list"}]},{"id":"14e49b2d-be9f-1af0-593a-77c4ba534f02","name":"Annex III: Biometrics","type":"term","description":"Remote biometric identification and emotion recognition","additionalInformation":"\u003cp>\u003cstrong>Annex III, Point 1 - Biometrics\u003c/strong>\u003c/p>\u003cp>High-risk AI systems in the area of biometrics include:\u003c/p>\u003cul>\u003cli>\u003cstrong>Remote biometric identification\u003c/strong> (excluding verification)\u003c/li>\u003cli>\u003cstrong>Emotion recognition\u003c/strong> in workplace and education\u003c/li>\u003cli>\u003cstrong>Biometric categorisation\u003c/strong> inferring sensitive attributes (race, political opinions, religion, sexual orientation)\u003c/li>\u003c/ul>\u003cp>Exception: Systems intended purely for biometric \u003cem>verification\u003c/em> (1:1 matching) are not automatically high-risk.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Annex III(1)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"622e1a31-8af4-ff3a-cb3b-3bad27c8f64b","sourceId":"14e49b2d-be9f-1af0-593a-77c4ba534f02","sourceName":"Annex III: Biometrics","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 1 of the list"}]},{"id":"38e97f82-de01-c3dd-d873-fc2bb4e16d5d","name":"Annex III: Critical Infrastructure","type":"term","description":"Safety components in road, water, gas, or electricity","additionalInformation":"\u003cp>\u003cstrong>Annex III, Point 2 - Critical Infrastructure\u003c/strong>\u003c/p>\u003cp>AI systems intended as safety components in the management and operation of:\u003c/p>\u003cul>\u003cli>\u003cstrong>Road traffic\u003c/strong> and vehicle supply (water, gas, heating, electricity)\u003c/li>\u003cli>\u003cstrong>Digital infrastructure\u003c/strong>\u003c/li>\u003c/ul>\u003cp>Only systems that are \u003cem>safety components\u003c/em> are high-risk, not general management systems.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Annex III(2)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"142011c1-c579-4428-f35c-025f89047851","sourceId":"38e97f82-de01-c3dd-d873-fc2bb4e16d5d","sourceName":"Annex III: Critical Infrastructure","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 2 of the list"}]},{"id":"2e231e7b-c3d2-6eef-4e23-b61c4ebb3332","name":"Annex III: Education","type":"term","description":"AI for admissions, student evaluation, or behavior monitoring","additionalInformation":"\u003cp>\u003cstrong>Annex III, Point 3 - Education and Vocational Training\u003c/strong>\u003c/p>\u003cp>High-risk AI systems used for:\u003c/p>\u003cul>\u003cli>Determining access or admission to educational institutions\u003c/li>\u003cli>Assigning persons to educational programmes\u003c/li>\u003cli>Assessing learning outcomes including for steering the learning process\u003c/li>\u003cli>Monitoring and detecting prohibited behaviour during tests\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Annex III(3)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"a8b1bc65-7d3c-ab43-2720-017edc270459","sourceId":"2e231e7b-c3d2-6eef-4e23-b61c4ebb3332","sourceName":"Annex III: Education","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 3 of the list"}]},{"id":"a80e2721-4f45-5b5e-1c2b-98c7b3f5c434","name":"Annex III: Employment","type":"term","description":"AI for recruitment, CV sorting, or task allocation","additionalInformation":"\u003cp>\u003cstrong>Annex III, Point 4 - Employment, workers management\u003c/strong>\u003c/p>\u003cp>High-risk AI systems used for:\u003c/p>\u003cul>\u003cli>\u003cstrong>Recruitment:\u003c/strong> placing targeted job ads, screening applications, filtering candidates\u003c/li>\u003cli>\u003cstrong>Decisions affecting work:\u003c/strong> promotion, termination, task allocation, monitoring, evaluation\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Annex III(4)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"534db2fd-cfae-6b95-080d-5e3ebae38663","sourceId":"a80e2721-4f45-5b5e-1c2b-98c7b3f5c434","sourceName":"Annex III: Employment","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 4 of the list"}]},{"id":"e4aad613-1d6f-77f2-9758-d13b0cc9fd98","name":"Annex III: Essential Services","type":"term","description":"AI for credit scoring, insurance, or social benefits","additionalInformation":"\u003cp>\u003cstrong>Annex III, Point 5 - Access to essential services\u003c/strong>\u003c/p>\u003cp>High-risk AI systems used to evaluate eligibility for:\u003c/p>\u003cul>\u003cli>\u003cstrong>Public assistance:\u003c/strong> benefits, services, healthcare\u003c/li>\u003cli>\u003cstrong>Credit scoring:\u003c/strong> assessing creditworthiness\u003c/li>\u003cli>\u003cstrong>Insurance:\u003c/strong> risk assessment and pricing for life and health\u003c/li>\u003cli>\u003cstrong>Emergency services:\u003c/strong> dispatching priorities\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Annex III(5)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"21ad11f8-9f7a-883b-d710-c8cf6eabc53c","sourceId":"e4aad613-1d6f-77f2-9758-d13b0cc9fd98","sourceName":"Annex III: Essential Services","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 5 of the list"}]},{"id":"f23ebc95-b8b2-e1fa-2dc9-ffc3c009af70","name":"Annex III: Justice","type":"term","description":"AI for judicial research or interpretation of facts","additionalInformation":"\u003cp>\u003cstrong>Annex III, Point 8 - Administration of justice\u003c/strong>\u003c/p>\u003cp>High-risk AI systems used by judicial or administrative authorities to:\u003c/p>\u003cul>\u003cli>Assist in \u003cstrong>researching and interpreting\u003c/strong> facts and law\u003c/li>\u003cli>Apply the law to concrete facts\u003c/li>\u003cli>\u003cstrong>Alternative dispute resolution\u003c/strong>\u003c/li>\u003c/ul>\u003cp>Does not include purely administrative tasks.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Annex III(8)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"0c01dfbe-9c6c-0510-f369-9af0633e02ec","sourceId":"f23ebc95-b8b2-e1fa-2dc9-ffc3c009af70","sourceName":"Annex III: Justice","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 8 of the list"}]},{"id":"f9c0bb23-e629-ba57-8fdf-dafc0f8fba63","name":"Annex III: Law Enforcement","type":"term","description":"AI for polygraphs, evidence assessment, or profiling","additionalInformation":"\u003cp>\u003cstrong>Annex III, Point 6 - Law enforcement\u003c/strong>\u003c/p>\u003cp>High-risk AI systems used by law enforcement for:\u003c/p>\u003cul>\u003cli>\u003cstrong>Polygraphs and similar:\u003c/strong> assessing reliability of evidence\u003c/li>\u003cli>\u003cstrong>Crime analytics:\u003c/strong> profiling during detection, investigation, prosecution\u003c/li>\u003cli>\u003cstrong>Risk assessment:\u003c/strong> assessing risk of offending or reoffending\u003c/li>\u003cli>Assessing personality traits and evidence reliability\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Annex III(6)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"a10d4717-06ab-c675-4ed5-fd0e85842d29","sourceId":"f9c0bb23-e629-ba57-8fdf-dafc0f8fba63","sourceName":"Annex III: Law Enforcement","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 6 of the list"}]},{"id":"eea0bfec-acba-3846-f4be-ae04f0970a62","name":"Annex III: Migration","type":"term","description":"AI for visa applications, border security, or asylum","additionalInformation":"\u003cp>\u003cstrong>Annex III, Point 7 - Migration, asylum, border control\u003c/strong>\u003c/p>\u003cp>High-risk AI systems used by authorities for:\u003c/p>\u003cul>\u003cli>\u003cstrong>Polygraphs or similar:\u003c/strong> detecting risk indicators\u003c/li>\u003cli>\u003cstrong>Risk assessment:\u003c/strong> security, irregular migration, health risks\u003c/li>\u003cli>\u003cstrong>Document verification:\u003c/strong> assessing authenticity\u003c/li>\u003cli>\u003cstrong>Visa applications:\u003c/strong> examining and assessing eligibility and conditions\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Annex III(7)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"660d72a6-641f-4dff-94a4-6fd5f08f39d0","sourceId":"eea0bfec-acba-3846-f4be-ae04f0970a62","sourceName":"Annex III: Migration","relationName":"is_listed_in","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Paragraph 7 of the list"}]},{"id":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","name":"Art 6(3) Exception","type":"policy","description":"Derogation for Annex III systems that do not pose significant risk","additionalInformation":"\u003cp>\u003cstrong>Article 6(3) - Derogation from high-risk classification\u003c/strong>\u003c/p>\u003cp>An Annex III system is NOT high-risk if:\u003c/p>\u003cul>\u003cli>It does not pose a \u003cstrong>significant risk\u003c/strong> of harm to health, safety, or fundamental rights\u003c/li>\u003cli>It performs a narrow procedural task, improves prior human activity, detects patterns without replacing assessment, or is purely preparatory\u003c/li>\u003c/ul>\u003cp>\u003cstrong>Cannot apply if:\u003c/strong> the system performs profiling of natural persons.\u003c/p>\u003cp>Provider must document and register the exemption.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 6(3)"},{"id":"1","name":"Risk Level","value":"Minimal"}],"relations":[{"id":"1dfb5da0-0f75-4ec3-831b-45ebc73aba17","sourceId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","sourceName":"Annex III Categories","relationName":"evaluates_against","targetId":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","targetName":"Art 6(3) Exception","description":"The entire list is eligible for the exception check"},{"id":"3be4be4f-3959-1133-c547-2f6f6706a621","sourceId":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","sourceName":"Art 6(3) Exception","relationName":"requires","targetId":"01e3c32f-8996-b78f-94d9-36633d8f067d","targetName":"Registration (Art. 49)","description":"Still requires DB entry"},{"id":"87ea7a2a-bdc3-ac59-91ee-159d550e95e9","sourceId":"f058bf86-b5cc-136c-dcd9-652a676df5ca","sourceName":"Profiling","relationName":"overrides","targetId":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","targetName":"Art 6(3) Exception","description":"Profiling blocks the exception path"},{"id":"c0fd4ccf-9155-2146-17dd-48edcc3b836e","sourceId":"aea75e3c-8c74-fd08-ffd6-2516e5ae4d99","sourceName":"Code of Conduct","relationName":"may_support","targetId":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","targetName":"Art 6(3) Exception","description":"Voluntary evidence only, no presumption"},{"id":"c33c2585-8fd5-9470-2c07-ca6cb220e4dc","sourceId":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","sourceName":"Art 6(3) Exception","relationName":"requires","targetId":"2454a690-b7f1-fc0c-3a10-2960d68378ce","targetName":"Exception Documentation","description":"Must document the 'why'"}]},{"id":"081b3878-1251-128e-514d-bd729ea0a7bd","name":"Authorized Representative","type":"controller","description":"EU-based person mandated by a non-EU provider for compliance tasks","additionalInformation":"\u003cp>\u003cstrong>Article 22 - Authorised representatives of providers of high-risk AI systems\u003c/strong>\u003c/p>\u003cp>Non-EU providers must appoint an authorised representative established in the Union \u003cem>before\u003c/em> making their AI systems available.\u003c/p>\u003cp>The representative must:\u003c/p>\u003cul>\u003cli>Verify conformity assessment and technical documentation exist\u003c/li>\u003cli>Keep documentation available for 10 years\u003c/li>\u003cli>Provide information to authorities upon request\u003c/li>\u003cli>Cooperate with competent authorities on corrective actions\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 22"}],"relations":[{"id":"10262ba1-d39a-273d-1f3a-18e9359bfe49","sourceId":"081b3878-1251-128e-514d-bd729ea0a7bd","sourceName":"Authorized Representative","relationName":"fulfills_role_of","targetId":"d87d4dc1-ca36-cda8-ed26-3e72f70e003e","targetName":"EU Anchor","description":"Creating a physical legal point of contact"},{"id":"3cd474c5-b647-85bc-2b37-9d3bf64f289a","sourceId":"d8d7e926-e1f0-09d4-7fb4-d1677dbdeecc","sourceName":"Compliance Mandate","relationName":"establishes","targetId":"081b3878-1251-128e-514d-bd729ea0a7bd","targetName":"Authorized Representative","description":"Formalizing legal presence"},{"id":"67db6f0a-4672-d80f-b522-519d58932c6d","sourceId":"081b3878-1251-128e-514d-bd729ea0a7bd","sourceName":"Authorized Representative","relationName":"must_verify","targetId":"728ed521-6afe-7438-2b7a-ee6acf712ac9","targetName":"Declaration of Conformity","description":"Ensuring provider signed legal proof"},{"id":"7636e128-6f33-4fe7-87ed-96f64e34d760","sourceId":"081b3878-1251-128e-514d-bd729ea0a7bd","sourceName":"Authorized Representative","relationName":"bears_legal_liability_for","targetId":"ad293abc-4145-bd84-bccd-7c6573a232c1","targetName":"AI Provider","description":"Statutory enforcement target for non-EU providers"},{"id":"87ae2866-836e-f49f-f3e6-f1f57653f179","sourceId":"081b3878-1251-128e-514d-bd729ea0a7bd","sourceName":"Authorized Representative","relationName":"acts_as_contact_for","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"Direct enforcement line"},{"id":"eb1f2c68-7dd7-28d7-76a7-7189ff5f20a5","sourceId":"081b3878-1251-128e-514d-bd729ea0a7bd","sourceName":"Authorized Representative","relationName":"holds_copy_of","targetId":"1a2d6190-e55f-ead1-2c0d-347bc2d6a1af","targetName":"Technical Documentation","description":"Keeping docs for 10 years"}]},{"id":"49640ee4-12bf-3cab-b143-14992fc04360","name":"Biometric Categorization","type":"term","description":"Assigning persons to categories based on biometric data","additionalInformation":"\u003cp>\u003cstrong>Article 3(40) - Definition + Article 5(1)(g) prohibition\u003c/strong>\u003c/p>\u003cp>Assigning natural persons to specific categories on the basis of biometric data.\u003c/p>\u003cp>\u003cstrong>Prohibited\u003c/strong> when used to categorise based on:\u003c/p>\u003cul>\u003cli>Race or ethnic origin\u003c/li>\u003cli>Political opinions\u003c/li>\u003cli>Trade union membership\u003c/li>\u003cli>Religious or philosophical beliefs\u003c/li>\u003cli>Sex life or sexual orientation\u003c/li>\u003c/ul>\u003cp>Exception: labelling/filtering of lawfully acquired biometric datasets.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(40)"},{"id":"1","name":"Risk Level","value":"Limited"}],"relations":[{"id":"42c7409a-352c-cd27-cee7-b62d6186a494","sourceId":"49640ee4-12bf-3cab-b143-14992fc04360","sourceName":"Biometric Categorization","relationName":"may_trigger","targetId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","targetName":"Prohibited Practice","description":"When used for inferring sensitive attributes in prohibited contexts"}]},{"id":"47167280-c023-1888-3b65-16e652d93491","name":"CE Marking","type":"term","description":"Visible mark indicating an AI system's conformity with the Regulation","additionalInformation":"\u003cp>\u003cstrong>Article 48 - CE marking\u003c/strong>\u003c/p>\u003cp>The CE marking:\u003c/p>\u003cul>\u003cli>Must be affixed \u003cstrong>visibly, legibly, and indelibly\u003c/strong>\u003c/li>\u003cli>Indicates conformity with this Regulation\u003c/li>\u003cli>Must be affixed \u003cem>before\u003c/em> placing on market\u003c/li>\u003c/ul>\u003cp>Systems not in conformity may not bear the CE marking. Affixing false CE marking is subject to penalties.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 48"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"b2f57554-26b7-b44a-3dca-8950f0992ff6","sourceId":"a7184bc1-5ac4-b4e0-5c5d-7b2c2dec05bc","sourceName":"Distributor","relationName":"verifies","targetId":"47167280-c023-1888-3b65-16e652d93491","targetName":"CE Marking","description":"Check before making available"},{"id":"c2706c18-3970-d84c-6a4d-a4fc81e5860e","sourceId":"47167280-c023-1888-3b65-16e652d93491","sourceName":"CE Marking","relationName":"indicates_conformity_of","targetId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","targetName":"High-Risk AI System","description":"System is now legally \"live\""},{"id":"d7682c23-f8c1-8368-e690-c0ad0254bfff","sourceId":"728ed521-6afe-7438-2b7a-ee6acf712ac9","sourceName":"Declaration of Conformity","relationName":"enables","targetId":"47167280-c023-1888-3b65-16e652d93491","targetName":"CE Marking","description":"Marking applied after signing declaration"}]},{"id":"47dc37b9-14df-6f38-6b39-ee883036199d","name":"Certificate of Conformity","type":"term","description":"Official document issued by a Notified Body confirming the system meets requirements","additionalInformation":"","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 44"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"6edbf572-d5c0-4e59-8830-0d3c9edf51bb","sourceId":"77bd8d37-427d-e467-0b3b-620ab292afe4","sourceName":"Notified Body","relationName":"issues","targetId":"47dc37b9-14df-6f38-6b39-ee883036199d","targetName":"Certificate of Conformity","description":"Validation of the conformity assessment"},{"id":"ee099e0a-458a-4b93-bd47-e4300e06ea00","sourceId":"47dc37b9-14df-6f38-6b39-ee883036199d","sourceName":"Certificate of Conformity","relationName":"supports","targetId":"728ed521-6afe-7438-2b7a-ee6acf712ac9","targetName":"Declaration of Conformity","description":"Required evidence before drawing up the declaration"}]},{"id":"29d54da4-0732-5b38-cf4c-76c14ef35bd0","name":"Chatbots","type":"term","description":"AI systems designed to interact directly with natural persons (e.g., customer service, companion AI)","additionalInformation":"\u003cp>\u003cstrong>Article 50(1) - Transparency obligation\u003c/strong>\u003c/p>\u003cp>Providers of AI systems designed to \u003cstrong>directly interact with natural persons\u003c/strong> must ensure that:\u003c/p>\u003cul>\u003cli>Persons are informed they are interacting with an AI system\u003c/li>\u003cli>Unless this is obvious from the circumstances and context of use\u003c/li>\u003c/ul>\u003cp>This includes customer service bots, virtual assistants, and companion AI.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 50(1)"},{"id":"1","name":"Risk Level","value":"Limited"}],"relations":[{"id":"97e3c81c-9144-702e-c36e-07216ed25d50","sourceId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","sourceName":"Natural Person","relationName":"interacts_with","targetId":"29d54da4-0732-5b38-cf4c-76c14ef35bd0","targetName":"Chatbots","description":"Triggering the transparency obligation"}]},{"id":"aea75e3c-8c74-fd08-ffd6-2516e5ae4d99","name":"Code of Conduct","type":"policy","description":"Voluntary commitment for non-high-risk AI to demonstrate compliance","additionalInformation":"\u003cp>\u003cstrong>Article 56 - Codes of conduct\u003c/strong>\u003c/p>\u003cp>The Commission and Member States shall encourage the drawing up of codes of conduct for:\u003c/p>\u003cul>\u003cli>Non-high-risk AI systems\u003c/li>\u003cli>Voluntary application of requirements for high-risk systems\u003c/li>\u003c/ul>\u003cp>Codes should address: sustainability, accessibility, stakeholder participation, diversity of development teams.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 56"},{"id":"1","name":"Risk Level","value":"Minimal"}],"relations":[{"id":"c0fd4ccf-9155-2146-17dd-48edcc3b836e","sourceId":"aea75e3c-8c74-fd08-ffd6-2516e5ae4d99","sourceName":"Code of Conduct","relationName":"may_support","targetId":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","targetName":"Art 6(3) Exception","description":"Voluntary evidence only, no presumption"}]},{"id":"050fc138-8d51-bfe1-bffe-99d394af024a","name":"Codes of Practice","type":"policy","description":"Industry standards that create presumption of conformity","additionalInformation":"","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 56"},{"id":"1","name":"Risk Level","value":"Minimal"}],"relations":[{"id":"421383cf-4e3a-4950-cf8d-dd708bfa1972","sourceId":"050fc138-8d51-bfe1-bffe-99d394af024a","sourceName":"Codes of Practice","relationName":"creates_presumption_of","targetId":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","targetName":"Conformity Assessment","description":"Legal presumption of compliance"}]},{"id":"b46154b5-3230-dc93-dbe6-e5b275ec684b","name":"Cognitive Behavioral Manipulation","type":"term","description":"Subliminal techniques that distort behavior and cause harm","additionalInformation":"\u003cp>\u003cstrong>Article 5(1)(a) - Prohibited practice\u003c/strong>\u003c/p>\u003cp>AI systems that deploy \u003cstrong>subliminal techniques\u003c/strong> beyond a person's consciousness, or \u003cstrong>purposely manipulative or deceptive techniques\u003c/strong>, with the objective or effect of materially distorting behaviour, causing or likely to cause significant harm.\u003c/p>\u003cp>\u003cstrong>Penalty:\u003c/strong> €35M or 7% of worldwide annual turnover.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 5"},{"id":"1","name":"Risk Level","value":"Unacceptable"}],"relations":[{"id":"d6621c4f-c02c-3b34-62b2-b33e3e0fa33f","sourceId":"b46154b5-3230-dc93-dbe6-e5b275ec684b","sourceName":"Cognitive Behavioral Manipulation","relationName":"results_in","targetId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","targetName":"Prohibited Practice","description":"Unacceptable risk"}]},{"id":"397c07a6-cde7-e6b2-fd7b-83c0375ab978","name":"Complaint","type":"term","description":"Formal notification of a suspected infringement","additionalInformation":"\u003cp>\u003cstrong>Article 85 - Right to lodge a complaint\u003c/strong>\u003c/p>\u003cp>Any natural or legal person may lodge a complaint with the relevant market surveillance authority if they have grounds to consider that there has been an infringement of this Regulation.\u003c/p>\u003cp>The authority must:\u003c/p>\u003cul>\u003cli>Inform the complainant of progress and outcome\u003c/li>\u003cli>Provide information on judicial remedies available\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 85"}],"relations":[{"id":"1bb8e9c0-5336-f706-1e05-247af549af04","sourceId":"397c07a6-cde7-e6b2-fd7b-83c0375ab978","sourceName":"Complaint","relationName":"alerts","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"Triggering investigation"}]},{"id":"d8d7e926-e1f0-09d4-7fb4-d1677dbdeecc","name":"Compliance Mandate","type":"term","description":"Written agreement defining the scope and duties of the EU representative","additionalInformation":"\u003cp>\u003cstrong>Article 22(2) - Mandate content\u003c/strong>\u003c/p>\u003cp>The written mandate must specify that the authorised representative:\u003c/p>\u003cul>\u003cli>Performs tasks on behalf of the provider\u003c/li>\u003cli>Can be addressed by authorities and the AI Office\u003c/li>\u003cli>Has authority to cooperate on all compliance matters\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 22(2)"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"3cd474c5-b647-85bc-2b37-9d3bf64f289a","sourceId":"d8d7e926-e1f0-09d4-7fb4-d1677dbdeecc","sourceName":"Compliance Mandate","relationName":"establishes","targetId":"081b3878-1251-128e-514d-bd729ea0a7bd","targetName":"Authorized Representative","description":"Formalizing legal presence"},{"id":"a52dbecd-8642-5a67-2f72-8f7d7a2ff0a8","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"issues","targetId":"d8d7e926-e1f0-09d4-7fb4-d1677dbdeecc","targetName":"Compliance Mandate","description":"Mandatory for providers outside the EU"}]},{"id":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","name":"Conformity Assessment","type":"policy","description":"The 'Logic Gate' verification process required for market entry","additionalInformation":"\u003cp>\u003cstrong>Article 43 - Conformity assessment procedures\u003c/strong>\u003c/p>\u003cp>Before placing on market, provider must:\u003c/p>\u003col>\u003cli>Verify compliance with all Chapter III requirements\u003c/li>\u003cli>For most cases: \u003cstrong>internal control\u003c/strong> procedure (Annex VI)\u003c/li>\u003cli>For biometrics, critical infrastructure, law enforcement, migration, justice: involve a \u003cstrong>notified body\u003c/strong> (Annex VII)\u003c/li>\u003c/ol>\u003cp>Successful assessment enables the Declaration of Conformity and CE marking.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 43"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"29aef02a-1add-d936-51d5-3e7a74ceac15","sourceId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","sourceName":"Quality Management System","relationName":"satisfies","targetId":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","targetName":"Conformity Assessment","description":"A compliant QMS is the evidence for assessment"},{"id":"421383cf-4e3a-4950-cf8d-dd708bfa1972","sourceId":"050fc138-8d51-bfe1-bffe-99d394af024a","sourceName":"Codes of Practice","relationName":"creates_presumption_of","targetId":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","targetName":"Conformity Assessment","description":"Legal presumption of compliance"},{"id":"4b352f09-5d2f-5ba3-c2ec-001b0c1c2d99","sourceId":"e9e1f3d8-14a7-03bb-9c03-eec5044c8bbe","sourceName":"Importer","relationName":"verifies","targetId":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","targetName":"Conformity Assessment","description":"Check before placing on market"},{"id":"e1410234-8f61-b6fa-62cd-55f8b9309b93","sourceId":"77bd8d37-427d-e467-0b3b-620ab292afe4","sourceName":"Notified Body","relationName":"validates","targetId":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","targetName":"Conformity Assessment","description":"Required for biometric/safety systems"}]},{"id":"96a713d7-e04f-f532-0d9b-40c790eb0f65","name":"Copyright Policy","type":"policy","description":"Strategy to identify and respect rights reservations","additionalInformation":"\u003cp>\u003cstrong>Article 53(1)(c) - Copyright compliance\u003c/strong>\u003c/p>\u003cp>GPAI providers must put in place a policy to:\u003c/p>\u003cul>\u003cli>Comply with Union copyright law\u003c/li>\u003cli>Identify and respect rights reservations (opt-outs)\u003c/li>\u003cli>Apply particularly to text and data mining exceptions\u003c/li>\u003c/ul>\u003cp>Providers must be able to demonstrate compliance upon request.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 53(1)(c)"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"5970f92a-d679-089b-be3c-5975094cefc9","sourceId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","sourceName":"GPAI Provider","relationName":"must_implement","targetId":"96a713d7-e04f-f532-0d9b-40c790eb0f65","targetName":"Copyright Policy","description":"Respecting EU rights reservations"}]},{"id":"b15ca22c-8937-de43-78cc-247c06d1b643","name":"Corrective Action","type":"term","description":"Measures taken to bring a system into compliance or mitigate harm","additionalInformation":"\u003cp>\u003cstrong>Articles 73-74 - Corrective measures\u003c/strong>\u003c/p>\u003cp>Upon finding non-compliance, providers or deployers must take corrective action to:\u003c/p>\u003cul>\u003cli>Bring the AI system into compliance\u003c/li>\u003cli>Withdraw or recall the system\u003c/li>\u003cli>Mitigate risks to affected persons\u003c/li>\u003c/ul>\u003cp>Market surveillance authorities may order such actions and set deadlines.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 73"}],"relations":[{"id":"1bc67fc6-16a3-4942-b35b-d65ad5142160","sourceId":"b15ca22c-8937-de43-78cc-247c06d1b643","sourceName":"Corrective Action","relationName":"performed_by","targetId":"ad293abc-4145-bd84-bccd-7c6573a232c1","targetName":"AI Provider","description":"The entity executing the fix"},{"id":"318eca88-ebfa-e6fa-cbd6-d7c45b1a008c","sourceId":"b03e8c8c-525b-e0eb-f963-7492108706dd","sourceName":"Market Surveillance Authority","relationName":"can_order","targetId":"b15ca22c-8937-de43-78cc-247c06d1b643","targetName":"Corrective Action","description":"Power to force fixes on non-compliant systems"}]},{"id":"f69111c0-48f6-137a-0b31-5ff7110f4d28","name":"Data Governance","type":"policy","description":"Requirements for high-quality training, validation, and testing datasets","additionalInformation":"\u003cp>\u003cstrong>Article 10 - Data and data governance\u003c/strong>\u003c/p>\u003cp>Training, validation, and testing data sets shall be subject to appropriate practices concerning:\u003c/p>\u003cul>\u003cli>Relevant design choices\u003c/li>\u003cli>Data collection and origin\u003c/li>\u003cli>Data preparation (annotation, labelling, cleaning)\u003c/li>\u003cli>Formulation of assumptions\u003c/li>\u003cli>Examination of biases likely to affect fundamental rights\u003c/li>\u003c/ul>\u003cp>Data sets must be relevant, representative, free of errors, and complete.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 10"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"6139bcef-fdef-c373-e458-a33d5f0f4205","sourceId":"f69111c0-48f6-137a-0b31-5ff7110f4d28","sourceName":"Data Governance","relationName":"is_part_of","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"Data quality managed within the QMS"}]},{"id":"b782c4bc-7e22-4b00-d70a-c715bc35f182","name":"Decision Explanation","type":"term","description":"Clear and meaningful info on the AI's role in a decision","additionalInformation":"\u003cp>\u003cstrong>Article 86 - Right to explanation\u003c/strong>\u003c/p>\u003cp>Affected persons have the right to obtain from the deployer \u003cstrong>clear and meaningful explanations\u003c/strong> of:\u003c/p>\u003cul>\u003cli>The role of the AI system in the decision-making procedure\u003c/li>\u003cli>The main elements of the decision taken\u003c/li>\u003c/ul>\u003cp>Applies to decisions significantly affecting rights in areas of high-risk AI (Annex III points 1-8).\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 86"}],"relations":[{"id":"4e129d9d-4ae9-eecf-9273-4f816efae471","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"provides","targetId":"b782c4bc-7e22-4b00-d70a-c715bc35f182","targetName":"Decision Explanation","description":"Contextual explanation for significant AI-assisted decisions"}]},{"id":"728ed521-6afe-7438-2b7a-ee6acf712ac9","name":"Declaration of Conformity","type":"term","description":"Official document signed by the provider stating the system is compliant","additionalInformation":"\u003cp>\u003cstrong>Article 47 - EU declaration of conformity\u003c/strong>\u003c/p>\u003cp>The provider must:\u003c/p>\u003cul>\u003cli>Draw up a written declaration for each high-risk AI system\u003c/li>\u003cli>State that the system meets requirements of Chapter III\u003c/li>\u003cli>Keep it updated and available for 10 years\u003c/li>\u003c/ul>\u003cp>Contents specified in \u003cstrong>Annex V\u003c/strong>: provider identity, system identification, reference to harmonised standards, and signature.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 47"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"67db6f0a-4672-d80f-b522-519d58932c6d","sourceId":"081b3878-1251-128e-514d-bd729ea0a7bd","sourceName":"Authorized Representative","relationName":"must_verify","targetId":"728ed521-6afe-7438-2b7a-ee6acf712ac9","targetName":"Declaration of Conformity","description":"Ensuring provider signed legal proof"},{"id":"9fde4c8e-675b-41bb-83eb-4fe3b92f0476","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"signs","targetId":"728ed521-6afe-7438-2b7a-ee6acf712ac9","targetName":"Declaration of Conformity","description":"The provider accepts full responsibility by signing"},{"id":"d7682c23-f8c1-8368-e690-c0ad0254bfff","sourceId":"728ed521-6afe-7438-2b7a-ee6acf712ac9","sourceName":"Declaration of Conformity","relationName":"enables","targetId":"47167280-c023-1888-3b65-16e652d93491","targetName":"CE Marking","description":"Marking applied after signing declaration"},{"id":"ee099e0a-458a-4b93-bd47-e4300e06ea00","sourceId":"47dc37b9-14df-6f38-6b39-ee883036199d","sourceName":"Certificate of Conformity","relationName":"supports","targetId":"728ed521-6afe-7438-2b7a-ee6acf712ac9","targetName":"Declaration of Conformity","description":"Required evidence before drawing up the declaration"}]},{"id":"1d919c45-0f75-25bb-8a13-d5566344e3af","name":"Deepfakes","type":"term","description":"AI-generated or manipulated image, audio, or video content that falsely appears to be authentic or truthful","additionalInformation":"\u003cp>\u003cstrong>Article 50(4) - Transparency for synthetic content\u003c/strong>\u003c/p>\u003cp>Deployers of AI systems generating synthetic audio, image, video, or text that:\u003c/p>\u003cul>\u003cli>Depicts existing persons, objects, places, or events\u003c/li>\u003cli>Would falsely appear to be authentic\u003c/li>\u003c/ul>\u003cp>Must disclose that content has been artificially generated or manipulated.\u003c/p>\u003cp>\u003cstrong>Exceptions:\u003c/strong> Law enforcement, exercise of fundamental rights (artistic expression, satire), and content that is obviously artistic.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(60)"},{"id":"1","name":"Risk Level","value":"Limited"}],"relations":[{"id":"15511ca7-4ad0-243e-197f-9bc777918d6e","sourceId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","sourceName":"Natural Person","relationName":"exposed_to","targetId":"1d919c45-0f75-25bb-8a13-d5566344e3af","targetName":"Deepfakes","description":"Triggering the labeling obligation"}]},{"id":"a7184bc1-5ac4-b4e0-5c5d-7b2c2dec05bc","name":"Distributor","type":"controller","description":"Entity in the supply chain (other than provider/importer) making AI available","additionalInformation":"\u003cp>\u003cstrong>Article 24 - Obligations of distributors\u003c/strong>\u003c/p>\u003cp>Before making a high-risk AI system available, distributors must verify that:\u003c/p>\u003cul>\u003cli>Provider has affixed CE marking\u003c/li>\u003cli>Technical documentation and instructions exist\u003c/li>\u003cli>Importer has complied with their obligations\u003c/li>\u003c/ul>\u003cp>If they have reason to believe the system is not compliant, they shall not make it available until brought into conformity.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 24"}],"relations":[{"id":"b2f57554-26b7-b44a-3dca-8950f0992ff6","sourceId":"a7184bc1-5ac4-b4e0-5c5d-7b2c2dec05bc","sourceName":"Distributor","relationName":"verifies","targetId":"47167280-c023-1888-3b65-16e652d93491","targetName":"CE Marking","description":"Check before making available"}]},{"id":"3fe62d55-1308-4180-89a2-c641bf502a15","name":"Downstream Info (Annex XII)","type":"policy","description":"Information provided to other developers to enable their own compliance","additionalInformation":"\u003cp>\u003cstrong>Annex XII - Information for downstream providers\u003c/strong>\u003c/p>\u003cp>GPAI model providers must supply to system integrators:\u003c/p>\u003cul>\u003cli>Model capabilities and limitations\u003c/li>\u003cli>Training and testing procedures\u003c/li>\u003cli>Evaluation results\u003c/li>\u003cli>Integration guidelines\u003c/li>\u003c/ul>\u003cp>This enables downstream providers to comply with their own high-risk AI obligations.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 53(1)(b)"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"5e00b6dc-c3e5-277a-f28d-8f8fd1f97c67","sourceId":"3fe62d55-1308-4180-89a2-c641bf502a15","sourceName":"Downstream Info (Annex XII)","relationName":"supplied_to","targetId":"ad293abc-4145-bd84-bccd-7c6573a232c1","targetName":"AI Provider","description":"Enabling system provider's compliance"},{"id":"94633beb-0180-510f-f8f6-a825a075a559","sourceId":"3fe62d55-1308-4180-89a2-c641bf502a15","sourceName":"Downstream Info (Annex XII)","relationName":"feeds_into","targetId":"1a2d6190-e55f-ead1-2c0d-347bc2d6a1af","targetName":"Technical Documentation","description":"Model info becomes part of System info"},{"id":"9c6cdbdd-eddf-a456-5fb6-5de7afbe8532","sourceId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","sourceName":"GPAI Provider","relationName":"must_provide","targetId":"3fe62d55-1308-4180-89a2-c641bf502a15","targetName":"Downstream Info (Annex XII)","description":"For system integration"}]},{"id":"f4a5abfb-ca69-91f0-45ab-10f331fd3192","name":"Emotion Recognition","type":"term","description":"AI system inferring emotions or intentions from biometric data","additionalInformation":"\u003cp>\u003cstrong>Article 3(39) - Definition\u003c/strong>\u003c/p>\u003cp>An AI system for identifying or inferring emotions or intentions of natural persons on the basis of their biometric data.\u003c/p>\u003cp>Use in \u003cstrong>workplace or education\u003c/strong> is high-risk (Annex III). Certain uses are prohibited (Art. 5) when used for biometric categorisation to infer sensitive attributes.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(39)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"75d6277e-2ba3-1c12-50ea-07a01fad6cf2","sourceId":"f4a5abfb-ca69-91f0-45ab-10f331fd3192","sourceName":"Emotion Recognition","relationName":"applies_to","targetId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","targetName":"Annex III Categories","description":"Emotion recognition in workplace or education is high-risk"}]},{"id":"e4be2c45-21f1-c401-dc22-94f5eb858c7f","name":"Energy Consumption","type":"policy","description":"Reporting on the energy efficiency and consumption of systemic models","additionalInformation":"\u003cp>\u003cstrong>Article 55(1)(d) - Reporting requirement\u003c/strong>\u003c/p>\u003cp>Providers of GPAI models with systemic risk must document and report:\u003c/p>\u003cul>\u003cli>Estimated energy consumption during training\u003c/li>\u003cli>Known or estimated energy consumption during inference\u003c/li>\u003c/ul>\u003cp>Information shall be reported to the AI Office.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 55(1)(d)"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"5a9a7bf8-c1c1-f5c9-87e2-413a1a1c5329","sourceId":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","sourceName":"GPAI with Systemic Risk","relationName":"requires","targetId":"e4be2c45-21f1-c401-dc22-94f5eb858c7f","targetName":"Energy Consumption","description":"Reporting environmental impact"}]},{"id":"d87d4dc1-ca36-cda8-ed26-3e72f70e003e","name":"EU Anchor","type":"term","description":"Derived compliance concept representing EU-based accountability point","additionalInformation":"\u003cp>\u003cstrong>Article 22 - Ensuring EU presence\u003c/strong>\u003c/p>\u003cp>Non-EU providers must establish a point of contact and legal responsibility within the EU through an authorised representative.\u003c/p>\u003cp>Purpose: Ensure enforcement is possible against entities outside the Union.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 22"},{"id":"1","name":"Risk Level","value":"Regulation"}],"relations":[{"id":"10262ba1-d39a-273d-1f3a-18e9359bfe49","sourceId":"081b3878-1251-128e-514d-bd729ea0a7bd","sourceName":"Authorized Representative","relationName":"fulfills_role_of","targetId":"d87d4dc1-ca36-cda8-ed26-3e72f70e003e","targetName":"EU Anchor","description":"Creating a physical legal point of contact"},{"id":"685f0343-b7fb-da1c-ea83-76ecabe48585","sourceId":"d87d4dc1-ca36-cda8-ed26-3e72f70e003e","sourceName":"EU Anchor","relationName":"held_liable_for","targetId":"931d4857-e673-6bd5-a39c-00f6586cd3d9","targetName":"Penalties (Art. 99)","description":"For non-EU provider violations"},{"id":"aad6e6c3-9d31-5ba6-59b3-efe547931998","sourceId":"d87d4dc1-ca36-cda8-ed26-3e72f70e003e","sourceName":"EU Anchor","relationName":"represents","targetId":"ad293abc-4145-bd84-bccd-7c6573a232c1","targetName":"AI Provider","description":"Bridge for non-EU entities"}]},{"id":"dba20eab-347a-639e-b7b5-edd221162714","name":"EU Database (Art. 71)","type":"policy","description":"Central EU electronic system for registering high-risk AI","additionalInformation":"\u003cp>\u003cstrong>Article 71 - EU database for high-risk AI systems\u003c/strong>\u003c/p>\u003cp>The Commission shall establish and maintain an EU database containing:\u003c/p>\u003cul>\u003cli>All high-risk AI systems registered under Article 49\u003c/li>\u003cli>FRIA results from public body deployers\u003c/li>\u003c/ul>\u003cp>Information shall be accessible to the public, except for confidential elements. Database enables traceability and public oversight.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 71"},{"id":"1","name":"Risk Level","value":"Regulation"}],"relations":[{"id":"441ccb39-1f16-3930-6116-f11553473e8c","sourceId":"01e3c32f-8996-b78f-94d9-36633d8f067d","sourceName":"Registration (Art. 49)","relationName":"populates","targetId":"dba20eab-347a-639e-b7b5-edd221162714","targetName":"EU Database (Art. 71)","description":"Public registry"},{"id":"6ba45234-9608-1a50-1edb-07ffd47be95d","sourceId":"355e2fc8-363f-ea9f-70f7-f4843ca74dba","sourceName":"FRIA Results","relationName":"uploaded_to","targetId":"dba20eab-347a-639e-b7b5-edd221162714","targetName":"EU Database (Art. 71)","description":"Transparency"}]},{"id":"817689f1-f4cc-8770-7a12-1cc841901e27","name":"European AI Board","type":"controller","description":"Advisory body composed of Member State representatives to ensure consistent application of the Act","additionalInformation":"\u003cp>\u003cstrong>Article 65-68 - Composition and tasks\u003c/strong>\u003c/p>\u003cp>Advisory body composed of one representative from each Member State.\u003c/p>\u003cp>Tasks include:\u003c/p>\u003cul>\u003cli>Advising the Commission on implementation\u003c/li>\u003cli>Contributing to consistent application across Member States\u003c/li>\u003cli>Collecting and sharing best practices\u003c/li>\u003cli>Issuing opinions and recommendations\u003c/li>\u003c/ul>\u003cp>Chaired by the Commission.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 65"}],"relations":[{"id":"2c2eddcf-5416-6c12-0f09-960f39a682a5","sourceId":"817689f1-f4cc-8770-7a12-1cc841901e27","sourceName":"European AI Board","relationName":"advises","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"On enforcement strategies"},{"id":"95f454e5-c593-cb06-22ce-387e32d721f8","sourceId":"817689f1-f4cc-8770-7a12-1cc841901e27","sourceName":"European AI Board","relationName":"advises","targetId":"75eb1fd3-8591-567b-7f1b-eb5e41ad7453","targetName":"European Commission","description":"On consistent application of the Act"},{"id":"fb7442ee-a57e-8b12-e7e0-f4166f989ffc","sourceId":"75eb1fd3-8591-567b-7f1b-eb5e41ad7453","sourceName":"European Commission","relationName":"chairs","targetId":"817689f1-f4cc-8770-7a12-1cc841901e27","targetName":"European AI Board","description":"Commission leads the advisory body"}]},{"id":"fcf9ffe6-745f-b76d-2c31-a452a2fb64dc","name":"European AI Office","type":"controller","description":"Commission-level body that oversees GPAI models and coordinates enforcement","additionalInformation":"\u003cp>\u003cstrong>Article 64 - Establishment and role\u003c/strong>\u003c/p>\u003cp>Commission body responsible for:\u003c/p>\u003cul>\u003cli>\u003cstrong>Supervising GPAI models\u003c/strong> and their providers\u003c/li>\u003cli>Developing guidance and codes of practice\u003c/li>\u003cli>Coordinating enforcement across Member States\u003c/li>\u003cli>Receiving notifications and systemic risk reports\u003c/li>\u003cli>Requesting information and conducting evaluations\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 64"}],"relations":[{"id":"cc1d585b-4181-5cb4-82d3-2567454956b4","sourceId":"fcf9ffe6-745f-b76d-2c31-a452a2fb64dc","sourceName":"European AI Office","relationName":"supervises","targetId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","targetName":"GPAI Provider","description":"Direct enforcement"}]},{"id":"75eb1fd3-8591-567b-7f1b-eb5e41ad7453","name":"European Commission","type":"controller","description":"Executive body of the EU managing the database and overall policy","additionalInformation":"\u003cp>\u003cstrong>Role in the AI Act\u003c/strong>\u003c/p>\u003cp>The Commission:\u003c/p>\u003cul>\u003cli>Adopts implementing and delegated acts\u003c/li>\u003cli>Manages the EU database (Art. 71)\u003c/li>\u003cli>Chairs the European AI Board\u003c/li>\u003cli>May request information from GPAI providers\u003c/li>\u003cli>Designates GPAI models as having systemic risk\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 71"}],"relations":[{"id":"95f454e5-c593-cb06-22ce-387e32d721f8","sourceId":"817689f1-f4cc-8770-7a12-1cc841901e27","sourceName":"European AI Board","relationName":"advises","targetId":"75eb1fd3-8591-567b-7f1b-eb5e41ad7453","targetName":"European Commission","description":"On consistent application of the Act"},{"id":"fb7442ee-a57e-8b12-e7e0-f4166f989ffc","sourceId":"75eb1fd3-8591-567b-7f1b-eb5e41ad7453","sourceName":"European Commission","relationName":"chairs","targetId":"817689f1-f4cc-8770-7a12-1cc841901e27","targetName":"European AI Board","description":"Commission leads the advisory body"}]},{"id":"2454a690-b7f1-fc0c-3a10-2960d68378ce","name":"Exception Documentation","type":"policy","description":"Mandatory assessment proving the system is not high-risk","additionalInformation":"\u003cp>\u003cstrong>Article 6(3) - Conditions for high-risk exemption\u003c/strong>\u003c/p>\u003cp>An Annex III system is NOT high-risk if it does not pose a significant risk of harm because it:\u003c/p>\u003cul>\u003cli>Performs a narrow procedural task\u003c/li>\u003cli>Improves result of previously completed human activity\u003c/li>\u003cli>Detects decision-making patterns without replacing human assessment\u003c/li>\u003cli>Performs only a preparatory task\u003c/li>\u003c/ul>\u003cp>Provider must document this assessment and make it available to authorities on request. Still requires database registration.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 6(3)"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"bdb4f8c9-875d-3ad2-9bb8-3f79ea7c6d3f","sourceId":"2454a690-b7f1-fc0c-3a10-2960d68378ce","sourceName":"Exception Documentation","relationName":"submitted_to","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"On request"},{"id":"c33c2585-8fd5-9470-2c07-ca6cb220e4dc","sourceId":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","sourceName":"Art 6(3) Exception","relationName":"requires","targetId":"2454a690-b7f1-fc0c-3a10-2960d68378ce","targetName":"Exception Documentation","description":"Must document the 'why'"}]},{"id":"16c9bf31-e020-1806-8e44-4752ac9f07a6","name":"FRIA (Art. 27)","type":"policy","description":"Fundamental Rights Impact Assessment for deployers","additionalInformation":"\u003cp>\u003cstrong>Article 27 - Fundamental Rights Impact Assessment\u003c/strong>\u003c/p>\u003cp>Required \u003cem>before\u003c/em> deploying high-risk AI when the deployer is:\u003c/p>\u003cul>\u003cli>A body governed by public law\u003c/li>\u003cli>A private operator providing public services\u003c/li>\u003cli>Using systems for creditworthiness or risk assessment\u003c/li>\u003c/ul>\u003cp>Assessment must cover:\u003c/p>\u003col>\u003cli>Description of deployer's processes using the AI\u003c/li>\u003cli>Period and frequency of use\u003c/li>\u003cli>Categories of affected persons\u003c/li>\u003cli>Specific risks of harm to affected groups\u003c/li>\u003cli>Human oversight measures\u003c/li>\u003c/ol>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 27"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"a952b3b0-5bde-cd8d-08c3-3867057b4ade","sourceId":"16c9bf31-e020-1806-8e44-4752ac9f07a6","sourceName":"FRIA (Art. 27)","relationName":"generates","targetId":"355e2fc8-363f-ea9f-70f7-f4843ca74dba","targetName":"FRIA Results","description":"Documented outcome"},{"id":"cf7c9eae-dde8-1bf0-1a7b-0db7a62fc4f5","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"must_perform","targetId":"16c9bf31-e020-1806-8e44-4752ac9f07a6","targetName":"FRIA (Art. 27)","description":"Pre-deployment assessment"}]},{"id":"355e2fc8-363f-ea9f-70f7-f4843ca74dba","name":"FRIA Results","type":"term","description":"The documented outcome of the assessment","additionalInformation":"\u003cp>\u003cstrong>Article 27(3-4) - Documentation and notification\u003c/strong>\u003c/p>\u003cp>The fundamental rights impact assessment must be:\u003c/p>\u003cul>\u003cli>\u003cstrong>Documented\u003c/strong> and retained for at least 5 years\u003c/li>\u003cli>\u003cstrong>Submitted\u003c/strong> to the market surveillance authority on request\u003c/li>\u003cli>\u003cstrong>Registered\u003c/strong> in the EU database (for public bodies)\u003c/li>\u003c/ul>\u003cp>If risks are identified, deployer must notify the market surveillance authority.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 27(3)"}],"relations":[{"id":"6ba45234-9608-1a50-1edb-07ffd47be95d","sourceId":"355e2fc8-363f-ea9f-70f7-f4843ca74dba","sourceName":"FRIA Results","relationName":"uploaded_to","targetId":"dba20eab-347a-639e-b7b5-edd221162714","targetName":"EU Database (Art. 71)","description":"Transparency"},{"id":"a952b3b0-5bde-cd8d-08c3-3867057b4ade","sourceId":"16c9bf31-e020-1806-8e44-4752ac9f07a6","sourceName":"FRIA (Art. 27)","relationName":"generates","targetId":"355e2fc8-363f-ea9f-70f7-f4843ca74dba","targetName":"FRIA Results","description":"Documented outcome"}]},{"id":"5dc8fde1-81c9-0bb0-8164-c5d339b727de","name":"GPAI Model","type":"term","description":"AI model displaying significant generality (e.g., LLMs)","additionalInformation":"\u003cp>\u003cstrong>Article 3(63) - Definition\u003c/strong>\u003c/p>\u003cp>A general-purpose AI model:\u003c/p>\u003cul>\u003cli>Displays significant generality\u003c/li>\u003cli>Is capable of competently performing a wide range of distinct tasks\u003c/li>\u003cli>Can be integrated into downstream AI systems\u003c/li>\u003c/ul>\u003cp>Examples: Large language models (LLMs), foundation models.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(63)"},{"id":"1","name":"Risk Level","value":"Limited"}],"relations":[{"id":"119ee5ee-b458-fa56-7449-20c275e9e7e7","sourceId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","sourceName":"GPAI Provider","relationName":"develops","targetId":"5dc8fde1-81c9-0bb0-8164-c5d339b727de","targetName":"GPAI Model","description":"Responsibility for model training"},{"id":"2ef14ccd-44b3-d231-862a-09852d66f51b","sourceId":"5dc8fde1-81c9-0bb0-8164-c5d339b727de","sourceName":"GPAI Model","relationName":"triggers","targetId":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","targetName":"GPAI with Systemic Risk","description":"If >10^25 FLOPs"},{"id":"f07c236e-277f-c571-c09b-628b58c1e686","sourceId":"5dc8fde1-81c9-0bb0-8164-c5d339b727de","sourceName":"GPAI Model","relationName":"is_a","targetId":"6a4e299a-2ecc-17c5-af32-6c0cd795992e","targetName":"AI Model","description":"General-purpose AI is a specialization of AI model"}]},{"id":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","name":"GPAI Provider","type":"controller","description":"Entity that develops a general-purpose AI model and places it on the market or puts it into service","additionalInformation":"\u003cp>\u003cstrong>Article 51-55 - Obligations\u003c/strong>\u003c/p>\u003cp>Providers of general-purpose AI models must:\u003c/p>\u003cul>\u003cli>Draw up technical documentation (Annex XI)\u003c/li>\u003cli>Provide information to AI system providers (Annex XII)\u003c/li>\u003cli>Put in place a copyright policy\u003c/li>\u003cli>Publish a training data summary\u003c/li>\u003c/ul>\u003cp>Additional obligations apply if the model has \u003cstrong>systemic risk\u003c/strong> (Art. 55).\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 51"}],"relations":[{"id":"119ee5ee-b458-fa56-7449-20c275e9e7e7","sourceId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","sourceName":"GPAI Provider","relationName":"develops","targetId":"5dc8fde1-81c9-0bb0-8164-c5d339b727de","targetName":"GPAI Model","description":"Responsibility for model training"},{"id":"5970f92a-d679-089b-be3c-5975094cefc9","sourceId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","sourceName":"GPAI Provider","relationName":"must_implement","targetId":"96a713d7-e04f-f532-0d9b-40c790eb0f65","targetName":"Copyright Policy","description":"Respecting EU rights reservations"},{"id":"9c6cdbdd-eddf-a456-5fb6-5de7afbe8532","sourceId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","sourceName":"GPAI Provider","relationName":"must_provide","targetId":"3fe62d55-1308-4180-89a2-c641bf502a15","targetName":"Downstream Info (Annex XII)","description":"For system integration"},{"id":"cc1d585b-4181-5cb4-82d3-2567454956b4","sourceId":"fcf9ffe6-745f-b76d-2c31-a452a2fb64dc","sourceName":"European AI Office","relationName":"supervises","targetId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","targetName":"GPAI Provider","description":"Direct enforcement"},{"id":"cce2ec8c-98f7-d087-02fd-e0c2ee78292d","sourceId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","sourceName":"GPAI Provider","relationName":"must_publish","targetId":"b11dad26-1466-3ec6-d5b0-f854763a8f97","targetName":"Training Data Summary","description":"Copyright transparency"},{"id":"fe996927-3d42-f6a3-1152-ab0a75b54893","sourceId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","sourceName":"GPAI Provider","relationName":"must_ensure","targetId":"4d72451a-7b8c-1eb1-2cc3-4763a3176f93","targetName":"GPAI Tech Docs (Annex XI)","description":"Internal record keeping"}]},{"id":"4d72451a-7b8c-1eb1-2cc3-4763a3176f93","name":"GPAI Tech Docs (Annex XI)","type":"policy","description":"Detailed technical documentation for the AI Office","additionalInformation":"\u003cp>\u003cstrong>Annex XI - Technical documentation for GPAI models\u003c/strong>\u003c/p>\u003cp>Must include:\u003c/p>\u003cul>\u003cli>Name and version of the model\u003c/li>\u003cli>Description of training methodology and techniques\u003c/li>\u003cli>Design choices and trade-offs\u003c/li>\u003cli>Description of computing resources used\u003c/li>\u003cli>Known limitations\u003c/li>\u003cli>Information on data used for training\u003c/li>\u003c/ul>\u003cp>Documentation must be provided to the AI Office upon request.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 53(1)(a)"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"fe996927-3d42-f6a3-1152-ab0a75b54893","sourceId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","sourceName":"GPAI Provider","relationName":"must_ensure","targetId":"4d72451a-7b8c-1eb1-2cc3-4763a3176f93","targetName":"GPAI Tech Docs (Annex XI)","description":"Internal record keeping"}]},{"id":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","name":"GPAI with Systemic Risk","type":"term","description":"GPAI models with high-impact capabilities or >10^25 FLOPs","additionalInformation":"\u003cp>\u003cstrong>Article 51 - Classification\u003c/strong>\u003c/p>\u003cp>A GPAI model has systemic risk if:\u003c/p>\u003cul>\u003cli>It has \u003cstrong>high-impact capabilities\u003c/strong> evaluated on benchmarks, OR\u003c/li>\u003cli>Training compute exceeds \u003cstrong>10²⁵ FLOPs\u003c/strong>, OR\u003c/li>\u003cli>Designated by Commission decision\u003c/li>\u003c/ul>\u003cp>Subject to additional obligations: adversarial testing, systemic risk mitigation, incident reporting, energy consumption reporting.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 51"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"2ef14ccd-44b3-d231-862a-09852d66f51b","sourceId":"5dc8fde1-81c9-0bb0-8164-c5d339b727de","sourceName":"GPAI Model","relationName":"triggers","targetId":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","targetName":"GPAI with Systemic Risk","description":"If >10^25 FLOPs"},{"id":"5a9a7bf8-c1c1-f5c9-87e2-413a1a1c5329","sourceId":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","sourceName":"GPAI with Systemic Risk","relationName":"requires","targetId":"e4be2c45-21f1-c401-dc22-94f5eb858c7f","targetName":"Energy Consumption","description":"Reporting environmental impact"},{"id":"adb0117f-b5e5-cdb1-15b2-846eb49dbf53","sourceId":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","sourceName":"GPAI with Systemic Risk","relationName":"requires","targetId":"04f8d7a9-1836-9075-aa1b-86f4e565b635","targetName":"Systemic Risk Mitigation","description":"Managing high-impact risks"},{"id":"f6f57a66-6abf-6c1b-48d8-2aa576b1d944","sourceId":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","sourceName":"GPAI with Systemic Risk","relationName":"requires","targetId":"893b5730-2fd4-bea4-addb-23bfff6b33b8","targetName":"Adversarial Testing","description":"Mandatory stress tests"}]},{"id":"829a45e3-51aa-c4d3-2c64-32f42d26989a","name":"High-Risk AI System","type":"term","description":"AI systems subject to strict obligations under Title III","additionalInformation":"\u003cp>\u003cstrong>Article 6 - Classification rules\u003c/strong>\u003c/p>\u003cp>An AI system is high-risk if:\u003c/p>\u003col>\u003cli>It's a product (or safety component) covered by Union harmonisation legislation listed in \u003cstrong>Annex I\u003c/strong>, OR\u003c/li>\u003cli>It falls within a use case listed in \u003cstrong>Annex III\u003c/strong>\u003c/li>\u003c/ol>\u003cp>Subject to extensive obligations: risk management, data governance, documentation, transparency, human oversight, accuracy, and quality management.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 6"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"075670d3-0a48-5db4-b6bc-4eb8f61cc3ba","sourceId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","sourceName":"High-Risk AI System","relationName":"incorporates","targetId":"6a4e299a-2ecc-17c5-af32-6c0cd795992e","targetName":"AI Model","description":"High-risk systems are built upon one or more AI models"},{"id":"2cda2525-6a36-e493-102f-421bf7920604","sourceId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","sourceName":"High-Risk AI System","relationName":"affects_rights_of","targetId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","targetName":"Natural Person","description":"The fundamental reason for the protections"},{"id":"43faecdd-ea32-4fe0-8d93-17ee8d635b11","sourceId":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","sourceName":"Annex III Categories","relationName":"applies_to","targetId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","targetName":"High-Risk AI System","description":"Designates systems as high-risk"},{"id":"7944cdfd-e2ca-c897-ef7b-54aa7f8cc8e8","sourceId":"69b91205-6482-0869-e4a0-b7f985cbb0ff","sourceName":"Right to Human Review","relationName":"applies_to","targetId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","targetName":"High-Risk AI System","description":"Human oversight must be available for high-risk systems"},{"id":"8d3f5972-9a65-c896-968a-971250d2a32c","sourceId":"28907db9-ced6-f968-3ff2-84a171ea4b40","sourceName":"Regulatory Sandbox","relationName":"enables_testing_of","targetId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","targetName":"High-Risk AI System","description":"Safe environment for innovation before full compliance"},{"id":"c2706c18-3970-d84c-6a4d-a4fc81e5860e","sourceId":"47167280-c023-1888-3b65-16e652d93491","sourceName":"CE Marking","relationName":"indicates_conformity_of","targetId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","targetName":"High-Risk AI System","description":"System is now legally \"live\""}]},{"id":"87eda482-7896-7cc1-b779-bc43455635d8","name":"Human Oversight","type":"policy","description":"Measures enabling natural persons to oversee AI system operation","additionalInformation":"\u003cp>\u003cstrong>Article 14 - Human oversight\u003c/strong>\u003c/p>\u003cp>High-risk AI systems must be designed to enable oversight by natural persons, including:\u003c/p>\u003cul>\u003cli>Fully understand system capabilities and limitations\u003c/li>\u003cli>Properly monitor operation and detect anomalies\u003c/li>\u003cli>Correctly interpret outputs\u003c/li>\u003cli>Decide not to use the system or override/reverse outputs\u003c/li>\u003cli>\u003cstrong>Interrupt\u003c/strong> the system via a \"stop\" button\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 14"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"0ca6a9b0-54fe-476f-7917-c185217385c6","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"must_ensure","targetId":"87eda482-7896-7cc1-b779-bc43455635d8","targetName":"Human Oversight","description":"Operational supervision"}]},{"id":"e9e1f3d8-14a7-03bb-9c03-eec5044c8bbe","name":"Importer","type":"controller","description":"EU entity placing an AI system from a third country on the Union market","additionalInformation":"\u003cp>\u003cstrong>Article 23 - Obligations of importers\u003c/strong>\u003c/p>\u003cp>Before placing a high-risk AI system on the market, importers must ensure:\u003c/p>\u003cul>\u003cli>Conformity assessment has been carried out\u003c/li>\u003cli>Technical documentation exists\u003c/li>\u003cli>CE marking is affixed\u003c/li>\u003cli>Instructions for use accompany the system\u003c/li>\u003cli>Provider has appointed authorised representative\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 23"}],"relations":[{"id":"4b352f09-5d2f-5ba3-c2ec-001b0c1c2d99","sourceId":"e9e1f3d8-14a7-03bb-9c03-eec5044c8bbe","sourceName":"Importer","relationName":"verifies","targetId":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","targetName":"Conformity Assessment","description":"Check before placing on market"}]},{"id":"53002712-a1ca-fd50-f0e8-71bb04a61163","name":"Incident Reporting","type":"policy","description":"Obligation to notify authorities of serious incidents","additionalInformation":"\u003cp>\u003cstrong>Article 73 - Reporting of serious incidents\u003c/strong>\u003c/p>\u003cp>Providers must report to market surveillance authorities:\u003c/p>\u003cul>\u003cli>\u003cstrong>Within 15 days\u003c/strong> of becoming aware of incident\u003c/li>\u003cli>\u003cstrong>Immediately\u003c/strong> if widespread infringement or serious breach of fundamental rights\u003c/li>\u003c/ul>\u003cp>Report must include: system identification, incident description, corrective measures taken.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 73"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"6f208e59-b274-83a2-c812-188ebf8e990d","sourceId":"1402d0ee-5e9a-c32c-c6c5-f4624d30ca2a","sourceName":"Serious Incident","relationName":"triggers","targetId":"53002712-a1ca-fd50-f0e8-71bb04a61163","targetName":"Incident Reporting","description":"Mandatory notification"},{"id":"8fe32e63-9da5-bbe2-df67-59445c7b47b1","sourceId":"53002712-a1ca-fd50-f0e8-71bb04a61163","sourceName":"Incident Reporting","relationName":"submitted_to","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"Reporting harm"}]},{"id":"300a994b-1be2-8e25-1d61-420916dee01e","name":"Instructions for Use","type":"policy","description":"Documentation informing deployers of capabilities and limitations","additionalInformation":"\u003cp>\u003cstrong>Article 13 - Transparency and Provision of Information\u003c/strong>\u003c/p>\u003cp>High-risk AI systems must be accompanied by instructions including:\u003c/p>\u003cul>\u003cli>Identity and contact details of provider\u003c/li>\u003cli>Characteristics, capabilities, and limitations\u003c/li>\u003cli>Intended purpose and foreseeable misuse\u003c/li>\u003cli>Performance metrics (accuracy, robustness, cybersecurity)\u003c/li>\u003cli>Human oversight measures\u003c/li>\u003cli>Expected lifetime and maintenance requirements\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 13"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"3de7ffcb-b2c8-51f2-307a-a4eb44dd1874","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"must_provide","targetId":"300a994b-1be2-8e25-1d61-420916dee01e","targetName":"Instructions for Use","description":"Info for the deployer"}]},{"id":"c08eb570-1dcf-6eb1-134b-32333b495515","name":"Interaction Disclosure","type":"policy","description":"Duty to inform natural persons they are interacting with an AI system","additionalInformation":"","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 50"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"025052ab-5b2a-609c-7845-08ee86baccd4","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"must_ensure","targetId":"c08eb570-1dcf-6eb1-134b-32333b495515","targetName":"Interaction Disclosure","description":"Informing users during AI interaction"}]},{"id":"b03e8c8c-525b-e0eb-f963-7492108706dd","name":"Market Surveillance Authority","type":"controller","description":"National authority responsible for monitoring compliance and enforcement","additionalInformation":"\u003cp>\u003cstrong>Articles 74-80 - National authorities\u003c/strong>\u003c/p>\u003cp>Member States shall designate authorities responsible for:\u003c/p>\u003cul>\u003cli>Market surveillance and enforcement\u003c/li>\u003cli>Receiving and investigating complaints\u003c/li>\u003cli>Ordering corrective actions or withdrawal\u003c/li>\u003cli>Imposing penalties\u003c/li>\u003c/ul>\u003cp>Must have adequate technical expertise and resources.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 74"}],"relations":[{"id":"118b2ec9-34e7-c1d6-a53d-1dad0d24478d","sourceId":"28907db9-ced6-f968-3ff2-84a171ea4b40","sourceName":"Regulatory Sandbox","relationName":"supervised_by","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"National authority oversight of sandbox participants"},{"id":"1bb8e9c0-5336-f706-1e05-247af549af04","sourceId":"397c07a6-cde7-e6b2-fd7b-83c0375ab978","sourceName":"Complaint","relationName":"alerts","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"Triggering investigation"},{"id":"2c2eddcf-5416-6c12-0f09-960f39a682a5","sourceId":"817689f1-f4cc-8770-7a12-1cc841901e27","sourceName":"European AI Board","relationName":"advises","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"On enforcement strategies"},{"id":"318eca88-ebfa-e6fa-cbd6-d7c45b1a008c","sourceId":"b03e8c8c-525b-e0eb-f963-7492108706dd","sourceName":"Market Surveillance Authority","relationName":"can_order","targetId":"b15ca22c-8937-de43-78cc-247c06d1b643","targetName":"Corrective Action","description":"Power to force fixes on non-compliant systems"},{"id":"625169ee-b1d0-14fa-6f9a-8dac70664349","sourceId":"b03e8c8c-525b-e0eb-f963-7492108706dd","sourceName":"Market Surveillance Authority","relationName":"imposes","targetId":"931d4857-e673-6bd5-a39c-00f6586cd3d9","targetName":"Penalties (Art. 99)","description":"Enforcement outcome"},{"id":"87ae2866-836e-f49f-f3e6-f1f57653f179","sourceId":"081b3878-1251-128e-514d-bd729ea0a7bd","sourceName":"Authorized Representative","relationName":"acts_as_contact_for","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"Direct enforcement line"},{"id":"8ba27fea-580c-4a1e-9b16-7453cfea2578","sourceId":"b03e8c8c-525b-e0eb-f963-7492108706dd","sourceName":"Market Surveillance Authority","relationName":"establishes","targetId":"79dd5aa7-0046-c3c8-f6c1-5fc925a1840d","targetName":"Violation","description":"Formal finding of non-compliance"},{"id":"8fe32e63-9da5-bbe2-df67-59445c7b47b1","sourceId":"53002712-a1ca-fd50-f0e8-71bb04a61163","sourceName":"Incident Reporting","relationName":"submitted_to","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"Reporting harm"},{"id":"bdb4f8c9-875d-3ad2-9bb8-3f79ea7c6d3f","sourceId":"2454a690-b7f1-fc0c-3a10-2960d68378ce","sourceName":"Exception Documentation","relationName":"submitted_to","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"On request"}]},{"id":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","name":"Natural Person","type":"data-subject","description":"Individual whose fundamental rights may be affected by AI systems","additionalInformation":"\u003cp>\u003cstrong>Article 3(1) - Scope of protection\u003c/strong>\u003c/p>\u003cp>The AI Act protects natural persons (individuals) whose fundamental rights may be affected by AI systems.\u003c/p>\u003cp>Key rights protected:\u003c/p>\u003cul>\u003cli>Human dignity\u003c/li>\u003cli>Non-discrimination\u003c/li>\u003cli>Privacy and data protection\u003c/li>\u003cli>Right to effective remedy\u003c/li>\u003cli>Right to explanation of AI-assisted decisions\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(1)"}],"relations":[{"id":"15511ca7-4ad0-243e-197f-9bc777918d6e","sourceId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","sourceName":"Natural Person","relationName":"exposed_to","targetId":"1d919c45-0f75-25bb-8a13-d5566344e3af","targetName":"Deepfakes","description":"Triggering the labeling obligation"},{"id":"2cda2525-6a36-e493-102f-421bf7920604","sourceId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","sourceName":"High-Risk AI System","relationName":"affects_rights_of","targetId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","targetName":"Natural Person","description":"The fundamental reason for the protections"},{"id":"301b81a9-9c61-844d-3e23-825ede81f624","sourceId":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","sourceName":"AI Deployer","relationName":"must_inform","targetId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","targetName":"Natural Person","description":"Duty to notify when using chatbots or emotion recognition"},{"id":"9110d8ac-407b-87ad-a5e4-c500a12cf836","sourceId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","sourceName":"Natural Person","relationName":"exercises","targetId":"b041011b-4df2-d5db-4630-4361412032fa","targetName":"Right to Lodge a Complaint","description":"Reporting violation"},{"id":"97e3c81c-9144-702e-c36e-07216ed25d50","sourceId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","sourceName":"Natural Person","relationName":"interacts_with","targetId":"29d54da4-0732-5b38-cf4c-76c14ef35bd0","targetName":"Chatbots","description":"Triggering the transparency obligation"},{"id":"a70806ba-c7a0-0ba3-8891-cad1b30504bd","sourceId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","sourceName":"Natural Person","relationName":"exercises","targetId":"b868569c-a7b6-e1a6-6321-338f091c68f8","targetName":"Right to Explanation","description":"Requesting logic of decision"},{"id":"b1bddb9d-28c8-50d5-d922-9f6568f3fd3e","sourceId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","sourceName":"Natural Person","relationName":"exercises","targetId":"69b91205-6482-0869-e4a0-b7f985cbb0ff","targetName":"Right to Human Review","description":"Right to obtain human intervention for significant decisions"},{"id":"d8c90bd1-4cf2-b51d-1cad-01c78f3f6e2d","sourceId":"1402d0ee-5e9a-c32c-c6c5-f4624d30ca2a","sourceName":"Serious Incident","relationName":"involves","targetId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","targetName":"Natural Person","description":"Incidents are often defined by harm to people"}]},{"id":"77bd8d37-427d-e467-0b3b-620ab292afe4","name":"Notified Body","type":"controller","description":"Independent third-party audit body that assesses high-risk AI","additionalInformation":"\u003cp>\u003cstrong>Article 3(22) - Definition and Articles 28-39\u003c/strong>\u003c/p>\u003cp>A conformity assessment body designated by a Member State to perform third-party assessment.\u003c/p>\u003cp>Required for high-risk systems involving:\u003c/p>\u003cul>\u003cli>Biometrics (Annex III, point 1)\u003c/li>\u003cli>Critical infrastructure (Annex III, point 2)\u003c/li>\u003cli>Law enforcement (Annex III, point 6)\u003c/li>\u003cli>Migration (Annex III, point 7)\u003c/li>\u003cli>Justice (Annex III, point 8)\u003c/li>\u003c/ul>\u003cp>Unless the provider uses harmonised standards providing full coverage.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(22)"}],"relations":[{"id":"6edbf572-d5c0-4e59-8830-0d3c9edf51bb","sourceId":"77bd8d37-427d-e467-0b3b-620ab292afe4","sourceName":"Notified Body","relationName":"issues","targetId":"47dc37b9-14df-6f38-6b39-ee883036199d","targetName":"Certificate of Conformity","description":"Validation of the conformity assessment"},{"id":"e1410234-8f61-b6fa-62cd-55f8b9309b93","sourceId":"77bd8d37-427d-e467-0b3b-620ab292afe4","sourceName":"Notified Body","relationName":"validates","targetId":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","targetName":"Conformity Assessment","description":"Required for biometric/safety systems"}]},{"id":"931d4857-e673-6bd5-a39c-00f6586cd3d9","name":"Penalties (Art. 99)","type":"term","description":"Financial sanctions for infringements","additionalInformation":"\u003cp>\u003cstrong>Article 99 - Penalties\u003c/strong>\u003c/p>\u003cp>Maximum administrative fines:\u003c/p>\u003ctable>\u003ctr>\u003ctd>\u003cstrong>Prohibited practices\u003c/strong>\u003c/td>\u003ctd>€35M or 7% of turnover\u003c/td>\u003c/tr>\u003ctr>\u003ctd>\u003cstrong>High-risk violations\u003c/strong>\u003c/td>\u003ctd>€15M or 3% of turnover\u003c/td>\u003c/tr>\u003ctr>\u003ctd>\u003cstrong>Incorrect information\u003c/strong>\u003c/td>\u003ctd>€7.5M or 1% of turnover\u003c/td>\u003c/tr>\u003c/table>\u003cp>SMEs and startups: lower of the two amounts. Fines must be effective, proportionate, and dissuasive.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 99"},{"id":"1","name":"Risk Level","value":"Regulation"}],"relations":[{"id":"5fb9f8a4-de51-16e8-f1a6-2d11662f8f5e","sourceId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","sourceName":"Prohibited Practice","relationName":"triggers","targetId":"931d4857-e673-6bd5-a39c-00f6586cd3d9","targetName":"Penalties (Art. 99)","description":"Tier 1 Fines"},{"id":"625169ee-b1d0-14fa-6f9a-8dac70664349","sourceId":"b03e8c8c-525b-e0eb-f963-7492108706dd","sourceName":"Market Surveillance Authority","relationName":"imposes","targetId":"931d4857-e673-6bd5-a39c-00f6586cd3d9","targetName":"Penalties (Art. 99)","description":"Enforcement outcome"},{"id":"685f0343-b7fb-da1c-ea83-76ecabe48585","sourceId":"d87d4dc1-ca36-cda8-ed26-3e72f70e003e","sourceName":"EU Anchor","relationName":"held_liable_for","targetId":"931d4857-e673-6bd5-a39c-00f6586cd3d9","targetName":"Penalties (Art. 99)","description":"For non-EU provider violations"},{"id":"ab1efd8d-f733-480f-8f4c-00c8f5beb5c8","sourceId":"79dd5aa7-0046-c3c8-f6c1-5fc925a1840d","sourceName":"Violation","relationName":"leads_to","targetId":"931d4857-e673-6bd5-a39c-00f6586cd3d9","targetName":"Penalties (Art. 99)","description":"Enforcement consequence"}]},{"id":"6518e503-d02f-da7b-6267-bd0abd166d27","name":"Post-Market Monitoring System","type":"policy","description":"System to collect and investigate performance data throughout lifetime","additionalInformation":"\u003cp>\u003cstrong>Article 72 - Post-market monitoring\u003c/strong>\u003c/p>\u003cp>Providers must establish a system to:\u003c/p>\u003cul>\u003cli>Collect and analyse data on performance throughout lifetime\u003c/li>\u003cli>Evaluate continuous compliance\u003c/li>\u003cli>Identify necessary corrective actions\u003c/li>\u003c/ul>\u003cp>System must be documented in the Quality Management System. For high-risk AI, results must be available to market surveillance authorities on request.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 72"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"3b0c42cc-665c-d435-efbe-6af58c110d50","sourceId":"6518e503-d02f-da7b-6267-bd0abd166d27","sourceName":"Post-Market Monitoring System","relationName":"is_part_of","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"Lifetime monitoring plan"}]},{"id":"bbfe65de-1bff-67bb-420b-a8d916613bc6","name":"Predictive Policing","type":"term","description":"Risk assessment based solely on profiling or personality traits","additionalInformation":"\u003cp>\u003cstrong>Article 5(1)(d) - Prohibited practice\u003c/strong>\u003c/p>\u003cp>AI systems for making risk assessments of natural persons to assess or predict the risk of a natural person committing a criminal offence, \u003cstrong>based solely on:\u003c/strong>\u003c/p>\u003cul>\u003cli>Profiling\u003c/li>\u003cli>Personality traits and characteristics\u003c/li>\u003cli>Past criminal behaviour\u003c/li>\u003c/ul>\u003cp>Does not prohibit AI supporting human assessment based on objective, verifiable facts.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 5"},{"id":"1","name":"Risk Level","value":"Unacceptable"}],"relations":[{"id":"bf84968c-5682-b820-d4f6-1fdd20f5746a","sourceId":"bbfe65de-1bff-67bb-420b-a8d916613bc6","sourceName":"Predictive Policing","relationName":"results_in","targetId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","targetName":"Prohibited Practice","description":"Unacceptable risk"}]},{"id":"075fdce9-eb7f-9e6c-a563-1051bb26c2ad","name":"Product Manufacturer","type":"controller","description":"Entity integrating high-risk AI into their product, assuming provider obligations","additionalInformation":"\u003cp>\u003cstrong>Article 25 - Responsibilities of product manufacturers\u003c/strong>\u003c/p>\u003cp>Where a high-risk AI system is a \u003cstrong>safety component of a product\u003c/strong>, the product manufacturer takes on provider obligations if they:\u003c/p>\u003cul>\u003cli>Place the product on market under their own name\u003c/li>\u003cli>Substantially modify the AI system\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 25"}],"relations":[{"id":"92a14279-89a7-1d0c-61e0-9ae4a115b78e","sourceId":"075fdce9-eb7f-9e6c-a563-1051bb26c2ad","sourceName":"Product Manufacturer","relationName":"assumes_role_of","targetId":"ad293abc-4145-bd84-bccd-7c6573a232c1","targetName":"AI Provider","description":"When integrating AI into a product, manufacturer takes on provider obligations"}]},{"id":"f058bf86-b5cc-136c-dcd9-652a676df5ca","name":"Profiling","type":"term","description":"Automated processing of personal data to evaluate traits (Overrides exceptions)","additionalInformation":"\u003cp>\u003cstrong>Article 3(44) cross-reference to GDPR\u003c/strong>\u003c/p>\u003cp>Automated processing of personal data to evaluate personal aspects, including analysing or predicting:\u003c/p>\u003cul>\u003cli>Work performance\u003c/li>\u003cli>Economic situation\u003c/li>\u003cli>Health, personal preferences\u003c/li>\u003cli>Interests, reliability, behaviour\u003c/li>\u003cli>Location or movements\u003c/li>\u003c/ul>\u003cp>\u003cstrong>Note:\u003c/strong> Profiling in high-risk AI \u003cem>disqualifies\u003c/em> the system from the Art 6(3) exception.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(44)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"87ea7a2a-bdc3-ac59-91ee-159d550e95e9","sourceId":"f058bf86-b5cc-136c-dcd9-652a676df5ca","sourceName":"Profiling","relationName":"overrides","targetId":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","targetName":"Art 6(3) Exception","description":"Profiling blocks the exception path"}]},{"id":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","name":"Prohibited Practice","type":"term","description":"AI practices banned due to unacceptable risk","additionalInformation":"\u003cp>\u003cstrong>Article 5 - Prohibited AI Practices\u003c/strong>\u003c/p>\u003cp>The following are \u003cstrong>banned\u003c/strong> in the Union:\u003c/p>\u003col>\u003cli>Subliminal manipulation causing harm\u003c/li>\u003cli>Exploitation of vulnerabilities (age, disability)\u003c/li>\u003cli>Social scoring by public authorities\u003c/li>\u003cli>Real-time remote biometric ID in public spaces (with exceptions)\u003c/li>\u003cli>Untargeted scraping for facial recognition databases\u003c/li>\u003cli>Emotion recognition in workplace/education (with exceptions)\u003c/li>\u003cli>Biometric categorisation inferring sensitive data\u003c/li>\u003cli>Individual predictive policing\u003c/li>\u003c/ol>\u003cp>\u003cstrong>Maximum penalty:\u003c/strong> €35M or 7% of global turnover.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 5"},{"id":"1","name":"Risk Level","value":"Unacceptable"}],"relations":[{"id":"42c7409a-352c-cd27-cee7-b62d6186a494","sourceId":"49640ee4-12bf-3cab-b143-14992fc04360","sourceName":"Biometric Categorization","relationName":"may_trigger","targetId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","targetName":"Prohibited Practice","description":"When used for inferring sensitive attributes in prohibited contexts"},{"id":"5c9fcaf4-0037-138d-f738-5df1a4377216","sourceId":"0d186b9f-d350-c87d-9b32-8196476070c4","sourceName":"Social Scoring","relationName":"results_in","targetId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","targetName":"Prohibited Practice","description":"Unacceptable risk"},{"id":"5fb9f8a4-de51-16e8-f1a6-2d11662f8f5e","sourceId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","sourceName":"Prohibited Practice","relationName":"triggers","targetId":"931d4857-e673-6bd5-a39c-00f6586cd3d9","targetName":"Penalties (Art. 99)","description":"Tier 1 Fines"},{"id":"bf84968c-5682-b820-d4f6-1fdd20f5746a","sourceId":"bbfe65de-1bff-67bb-420b-a8d916613bc6","sourceName":"Predictive Policing","relationName":"results_in","targetId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","targetName":"Prohibited Practice","description":"Unacceptable risk"},{"id":"d095ce28-756b-bbac-cd75-1749a2ecd898","sourceId":"c85c388f-ea60-a0f7-7e74-018cfae19159","sourceName":"Real-time Remote Biometric ID","relationName":"results_in","targetId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","targetName":"Prohibited Practice","description":"Unacceptable risk"},{"id":"d6621c4f-c02c-3b34-62b2-b33e3e0fa33f","sourceId":"b46154b5-3230-dc93-dbe6-e5b275ec684b","sourceName":"Cognitive Behavioral Manipulation","relationName":"results_in","targetId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","targetName":"Prohibited Practice","description":"Unacceptable risk"}]},{"id":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","name":"Quality Management System","type":"policy","description":"Documented policies and procedures ensuring lifecycle compliance","additionalInformation":"\u003cp>\u003cstrong>Article 17 - Quality management system\u003c/strong>\u003c/p>\u003cp>Providers must establish a documented QMS including:\u003c/p>\u003cul>\u003cli>Strategy for regulatory compliance\u003c/li>\u003cli>Design, development, and examination techniques\u003c/li>\u003cli>Risk management procedures\u003c/li>\u003cli>Post-market monitoring system\u003c/li>\u003cli>Procedures for incident reporting\u003c/li>\u003cli>Communication with authorities\u003c/li>\u003c/ul>\u003cp>Must be proportionate to size of provider's organisation.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 17"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"2352d553-ca57-6ba0-0b0c-9b5855c19d88","sourceId":"da72cffa-0935-6853-5bc4-64878317071a","sourceName":"Record Keeping","relationName":"is_part_of","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"Logging processes managed within QMS"},{"id":"29aef02a-1add-d936-51d5-3e7a74ceac15","sourceId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","sourceName":"Quality Management System","relationName":"satisfies","targetId":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","targetName":"Conformity Assessment","description":"A compliant QMS is the evidence for assessment"},{"id":"37fdd540-0904-e551-fd26-98c985bba3c7","sourceId":"1a2d6190-e55f-ead1-2c0d-347bc2d6a1af","sourceName":"Technical Documentation","relationName":"is_part_of","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"QMS manages all required documentation"},{"id":"3b0c42cc-665c-d435-efbe-6af58c110d50","sourceId":"6518e503-d02f-da7b-6267-bd0abd166d27","sourceName":"Post-Market Monitoring System","relationName":"is_part_of","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"Lifetime monitoring plan"},{"id":"6139bcef-fdef-c373-e458-a33d5f0f4205","sourceId":"f69111c0-48f6-137a-0b31-5ff7110f4d28","sourceName":"Data Governance","relationName":"is_part_of","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"Data quality managed within the QMS"},{"id":"776b4028-bc4b-40c1-268f-a05b5f313221","sourceId":"25d45a2a-b12d-0530-8307-7442f5201525","sourceName":"Risk Assessment System","relationName":"is_part_of","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"Risk logs managed within QMS"},{"id":"a4e964f3-2bfc-9a88-81eb-872c9a3a0402","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"establishes","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"Mandatory framework for internal compliance"}]},{"id":"c85c388f-ea60-a0f7-7e74-018cfae19159","name":"Real-time Remote Biometric ID","type":"term","description":"Biometric ID in publicly accessible spaces for law enforcement","additionalInformation":"\u003cp>\u003cstrong>Article 5(1)(h) - Prohibited practice (with exceptions)\u003c/strong>\u003c/p>\u003cp>The use of real-time remote biometric identification in \u003cstrong>publicly accessible spaces\u003c/strong> for law enforcement is prohibited.\u003c/p>\u003cp>\u003cstrong>Exceptions\u003c/strong> (subject to prior authorisation):\u003c/p>\u003cul>\u003cli>Targeted search for victims of crime or missing persons\u003c/li>\u003cli>Prevention of genuine, present threat to life or terrorist attack\u003c/li>\u003cli>Localisation of suspects of serious crimes listed in Annex II\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 5"},{"id":"1","name":"Risk Level","value":"Unacceptable"}],"relations":[{"id":"d095ce28-756b-bbac-cd75-1749a2ecd898","sourceId":"c85c388f-ea60-a0f7-7e74-018cfae19159","sourceName":"Real-time Remote Biometric ID","relationName":"results_in","targetId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","targetName":"Prohibited Practice","description":"Unacceptable risk"}]},{"id":"da72cffa-0935-6853-5bc4-64878317071a","name":"Record Keeping","type":"policy","description":"Automatic logging of events during system operation","additionalInformation":"\u003cp>\u003cstrong>Article 12 - Record-keeping (Logging)\u003c/strong>\u003c/p>\u003cp>High-risk AI systems must enable \u003cstrong>automatic recording of events\u003c/strong> (logs) throughout operation.\u003c/p>\u003cp>Logs must allow:\u003c/p>\u003cul>\u003cli>Tracing system operation where relevant for compliance\u003c/li>\u003cli>Monitoring for serious incidents or malfunctioning\u003c/li>\u003cli>Post-market monitoring\u003c/li>\u003c/ul>\u003cp>Logs shall be kept for a period proportionate to intended purpose (at least 6 months).\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 12"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"2352d553-ca57-6ba0-0b0c-9b5855c19d88","sourceId":"da72cffa-0935-6853-5bc4-64878317071a","sourceName":"Record Keeping","relationName":"is_part_of","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"Logging processes managed within QMS"}]},{"id":"01e3c32f-8996-b78f-94d9-36633d8f067d","name":"Registration (Art. 49)","type":"policy","description":"Mandatory obligation to enter system data before market entry","additionalInformation":"\u003cp>\u003cstrong>Article 49 - Registration\u003c/strong>\u003c/p>\u003cp>Before placing a high-risk AI system on the market or putting it into service, the provider or authorised representative shall register that system in the EU database referred to in Article 71.\u003c/p>\u003cul>\u003cli>Registration must occur \u003cem>before\u003c/em> market entry\u003c/li>\u003cli>Information remains in database for 10 years after system withdrawal\u003c/li>\u003cli>Must include contact details, conformity assessment results, and system description\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 49"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"3be4be4f-3959-1133-c547-2f6f6706a621","sourceId":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","sourceName":"Art 6(3) Exception","relationName":"requires","targetId":"01e3c32f-8996-b78f-94d9-36633d8f067d","targetName":"Registration (Art. 49)","description":"Still requires DB entry"},{"id":"441ccb39-1f16-3930-6116-f11553473e8c","sourceId":"01e3c32f-8996-b78f-94d9-36633d8f067d","sourceName":"Registration (Art. 49)","relationName":"populates","targetId":"dba20eab-347a-639e-b7b5-edd221162714","targetName":"EU Database (Art. 71)","description":"Public registry"},{"id":"a99a95d0-6eae-db4c-4db6-33f9f8a16600","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"performs","targetId":"01e3c32f-8996-b78f-94d9-36633d8f067d","targetName":"Registration (Art. 49)","description":"Database entry"}]},{"id":"28907db9-ced6-f968-3ff2-84a171ea4b40","name":"Regulatory Sandbox","type":"policy","description":"Controlled environment for testing innovative AI before market entry","additionalInformation":"\u003cp>\u003cstrong>Articles 57-62 - AI regulatory sandboxes\u003c/strong>\u003c/p>\u003cp>Member States shall establish at least one regulatory sandbox providing a controlled environment to:\u003c/p>\u003cul>\u003cli>Test innovative AI systems before market entry\u003c/li>\u003cli>Receive guidance from competent authorities\u003c/li>\u003cli>Operate under relaxed requirements for limited periods\u003c/li>\u003c/ul>\u003cp>Sandboxes shall be accessible to SMEs and startups.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 57-62"},{"id":"1","name":"Risk Level","value":"Regulation"}],"relations":[{"id":"118b2ec9-34e7-c1d6-a53d-1dad0d24478d","sourceId":"28907db9-ced6-f968-3ff2-84a171ea4b40","sourceName":"Regulatory Sandbox","relationName":"supervised_by","targetId":"b03e8c8c-525b-e0eb-f963-7492108706dd","targetName":"Market Surveillance Authority","description":"National authority oversight of sandbox participants"},{"id":"8d3f5972-9a65-c896-968a-971250d2a32c","sourceId":"28907db9-ced6-f968-3ff2-84a171ea4b40","sourceName":"Regulatory Sandbox","relationName":"enables_testing_of","targetId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","targetName":"High-Risk AI System","description":"Safe environment for innovation before full compliance"}]},{"id":"b868569c-a7b6-e1a6-6321-338f091c68f8","name":"Right to Explanation","type":"policy","description":"Right of affected persons to receive explanation for decisions","additionalInformation":"\u003cp>\u003cstrong>Article 86 - Scope and content\u003c/strong>\u003c/p>\u003cp>This right applies when a decision is taken:\u003c/p>\u003cul>\u003cli>On the basis of output from a high-risk AI system\u003c/li>\u003cli>That produces legal effects or similarly significantly affects a person\u003c/li>\u003c/ul>\u003cp>The explanation must be provided in a clear, meaningful, and timely manner.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 86"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"a70806ba-c7a0-0ba3-8891-cad1b30504bd","sourceId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","sourceName":"Natural Person","relationName":"exercises","targetId":"b868569c-a7b6-e1a6-6321-338f091c68f8","targetName":"Right to Explanation","description":"Requesting logic of decision"}]},{"id":"69b91205-6482-0869-e4a0-b7f985cbb0ff","name":"Right to Human Review","type":"policy","description":"Right to obtain human intervention in automated decisions","additionalInformation":"\u003cp>\u003cstrong>Article 14(4) - Human intervention\u003c/strong>\u003c/p>\u003cp>Natural persons to whom human oversight is assigned must be able to:\u003c/p>\u003cul>\u003cli>Fully understand the AI system\u003c/li>\u003cli>Monitor operation properly\u003c/li>\u003cli>Remain aware of automation bias\u003c/li>\u003cli>Correctly interpret output\u003c/li>\u003cli>Decide not to use, override, or reverse output\u003c/li>\u003cli>Intervene or interrupt via a \"stop\" button\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 14(4)"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"7944cdfd-e2ca-c897-ef7b-54aa7f8cc8e8","sourceId":"69b91205-6482-0869-e4a0-b7f985cbb0ff","sourceName":"Right to Human Review","relationName":"applies_to","targetId":"829a45e3-51aa-c4d3-2c64-32f42d26989a","targetName":"High-Risk AI System","description":"Human oversight must be available for high-risk systems"},{"id":"b1bddb9d-28c8-50d5-d922-9f6568f3fd3e","sourceId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","sourceName":"Natural Person","relationName":"exercises","targetId":"69b91205-6482-0869-e4a0-b7f985cbb0ff","targetName":"Right to Human Review","description":"Right to obtain human intervention for significant decisions"}]},{"id":"b041011b-4df2-d5db-4630-4361412032fa","name":"Right to Lodge a Complaint","type":"policy","description":"Right for any person to submit a complaint regarding infringements","additionalInformation":"\u003cp>\u003cstrong>Article 85 - Right to lodge a complaint\u003c/strong>\u003c/p>\u003cp>Any person may submit a complaint to the market surveillance authority if they consider there has been an infringement.\u003c/p>\u003cp>Complaints shall be:\u003c/p>\u003cul>\u003cli>Processed in accordance with national procedures\u003c/li>\u003cli>Tracked with outcome communicated to complainant\u003c/li>\u003c/ul>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 85"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"9110d8ac-407b-87ad-a5e4-c500a12cf836","sourceId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","sourceName":"Natural Person","relationName":"exercises","targetId":"b041011b-4df2-d5db-4630-4361412032fa","targetName":"Right to Lodge a Complaint","description":"Reporting violation"}]},{"id":"25d45a2a-b12d-0530-8307-7442f5201525","name":"Risk Assessment System","type":"policy","description":"Continuous risk management throughout the AI lifecycle","additionalInformation":"\u003cp>\u003cstrong>Article 9 - Risk Management System\u003c/strong>\u003c/p>\u003cp>A continuous, iterative process throughout the AI system's lifecycle, including:\u003c/p>\u003col>\u003cli>\u003cstrong>Identification\u003c/strong> and analysis of known and foreseeable risks\u003c/li>\u003cli>\u003cstrong>Estimation and evaluation\u003c/strong> of risks during intended use and misuse\u003c/li>\u003cli>\u003cstrong>Adoption of risk management measures\u003c/strong>\u003c/li>\u003cli>\u003cstrong>Testing\u003c/strong> to ensure measures are effective\u003c/li>\u003c/ol>\u003cp>Residual risks must be communicated to deployers in instructions for use.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 9"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"776b4028-bc4b-40c1-268f-a05b5f313221","sourceId":"25d45a2a-b12d-0530-8307-7442f5201525","sourceName":"Risk Assessment System","relationName":"is_part_of","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"Risk logs managed within QMS"}]},{"id":"1402d0ee-5e9a-c32c-c6c5-f4624d30ca2a","name":"Serious Incident","type":"term","description":"An event triggering mandatory reporting (death, harm, rights breach)","additionalInformation":"\u003cp>\u003cstrong>Article 3(49) - Definition\u003c/strong>\u003c/p>\u003cp>An incident or malfunctioning that directly or indirectly leads to:\u003c/p>\u003cul>\u003cli>\u003cstrong>Death\u003c/strong> of a person\u003c/li>\u003cli>\u003cstrong>Serious damage\u003c/strong> to health or safety\u003c/li>\u003cli>\u003cstrong>Serious and irreversible disruption\u003c/strong> of critical infrastructure\u003c/li>\u003cli>\u003cstrong>Breach of fundamental rights\u003c/strong>\u003c/li>\u003c/ul>\u003cp>Must be reported to market surveillance authorities within \u003cstrong>15 days\u003c/strong> (Art. 73).\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 3(49)"},{"id":"1","name":"Risk Level","value":"High"}],"relations":[{"id":"6f208e59-b274-83a2-c812-188ebf8e990d","sourceId":"1402d0ee-5e9a-c32c-c6c5-f4624d30ca2a","sourceName":"Serious Incident","relationName":"triggers","targetId":"53002712-a1ca-fd50-f0e8-71bb04a61163","targetName":"Incident Reporting","description":"Mandatory notification"},{"id":"d8c90bd1-4cf2-b51d-1cad-01c78f3f6e2d","sourceId":"1402d0ee-5e9a-c32c-c6c5-f4624d30ca2a","sourceName":"Serious Incident","relationName":"involves","targetId":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","targetName":"Natural Person","description":"Incidents are often defined by harm to people"}]},{"id":"0d186b9f-d350-c87d-9b32-8196476070c4","name":"Social Scoring","type":"term","description":"Evaluation of persons based on social behavior or personal traits","additionalInformation":"\u003cp>\u003cstrong>Article 5(1)(c) - Prohibited AI Practice\u003c/strong>\u003c/p>\u003cp>AI systems that evaluate or classify natural persons based on their social behaviour or personal characteristics, leading to detrimental or unfavourable treatment that is:\u003c/p>\u003cul>\u003cli>Unjustified or disproportionate to the social behaviour\u003c/li>\u003cli>Applied in social contexts unrelated to where data was collected\u003c/li>\u003c/ul>\u003cp>\u003cstrong>Penalty:\u003c/strong> Up to €35 million or 7% of worldwide annual turnover.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 5"},{"id":"1","name":"Risk Level","value":"Unacceptable"}],"relations":[{"id":"5c9fcaf4-0037-138d-f738-5df1a4377216","sourceId":"0d186b9f-d350-c87d-9b32-8196476070c4","sourceName":"Social Scoring","relationName":"results_in","targetId":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","targetName":"Prohibited Practice","description":"Unacceptable risk"}]},{"id":"1d471761-94f4-715b-ba40-6313bedfffdf","name":"Synthetic Content Labeling","type":"policy","description":"Duty to disclose AI-generated or manipulated content (deepfakes)","additionalInformation":"","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 52"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"9fc67355-c7e4-59e5-fced-0a1cbc79ce93","sourceId":"ad293abc-4145-bd84-bccd-7c6573a232c1","sourceName":"AI Provider","relationName":"must_ensure","targetId":"1d471761-94f4-715b-ba40-6313bedfffdf","targetName":"Synthetic Content Labeling","description":"Labeling synthetic content unless exception applies"}]},{"id":"04f8d7a9-1836-9075-aa1b-86f4e565b635","name":"Systemic Risk Mitigation","type":"policy","description":"Mandatory assessment and reduction of risks at a Union-wide level","additionalInformation":"\u003cp>\u003cstrong>Article 55 - Obligations for providers of GPAI models with systemic risk\u003c/strong>\u003c/p>\u003cp>Providers must:\u003c/p>\u003cul>\u003cli>Perform model evaluation including adversarial testing\u003c/li>\u003cli>Assess and mitigate possible systemic risks at Union level\u003c/li>\u003cli>Track, document, and report serious incidents to the AI Office\u003c/li>\u003cli>Ensure adequate cybersecurity protection\u003c/li>\u003c/ul>\u003cp>\u003cem>Systemic risks\u003c/em> include significant negative effects on public health, safety, fundamental rights, or society as a whole.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 55"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"adb0117f-b5e5-cdb1-15b2-846eb49dbf53","sourceId":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","sourceName":"GPAI with Systemic Risk","relationName":"requires","targetId":"04f8d7a9-1836-9075-aa1b-86f4e565b635","targetName":"Systemic Risk Mitigation","description":"Managing high-impact risks"}]},{"id":"1a2d6190-e55f-ead1-2c0d-347bc2d6a1af","name":"Technical Documentation","type":"policy","description":"Documentation demonstrating compliance with legal requirements","additionalInformation":"\u003cp>\u003cstrong>Article 11 - Technical Documentation\u003c/strong>\u003c/p>\u003cp>Must be drawn up \u003cem>before\u003c/em> placing system on market and kept up-to-date. Must demonstrate compliance with Chapter III requirements.\u003c/p>\u003cp>Contents include:\u003c/p>\u003cul>\u003cli>General description and intended purpose\u003c/li>\u003cli>Detailed description of system elements and development process\u003c/li>\u003cli>Monitoring, functioning, and control mechanisms\u003c/li>\u003cli>Risk management system documentation\u003c/li>\u003cli>Description of relevant changes over lifecycle\u003c/li>\u003c/ul>\u003cp>Requirements detailed in \u003cstrong>Annex IV\u003c/strong>.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 11"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"37fdd540-0904-e551-fd26-98c985bba3c7","sourceId":"1a2d6190-e55f-ead1-2c0d-347bc2d6a1af","sourceName":"Technical Documentation","relationName":"is_part_of","targetId":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","targetName":"Quality Management System","description":"QMS manages all required documentation"},{"id":"94633beb-0180-510f-f8f6-a825a075a559","sourceId":"3fe62d55-1308-4180-89a2-c641bf502a15","sourceName":"Downstream Info (Annex XII)","relationName":"feeds_into","targetId":"1a2d6190-e55f-ead1-2c0d-347bc2d6a1af","targetName":"Technical Documentation","description":"Model info becomes part of System info"},{"id":"eb1f2c68-7dd7-28d7-76a7-7189ff5f20a5","sourceId":"081b3878-1251-128e-514d-bd729ea0a7bd","sourceName":"Authorized Representative","relationName":"holds_copy_of","targetId":"1a2d6190-e55f-ead1-2c0d-347bc2d6a1af","targetName":"Technical Documentation","description":"Keeping docs for 10 years"}]},{"id":"b11dad26-1466-3ec6-d5b0-f854763a8f97","name":"Training Data Summary","type":"policy","description":"Publicly available summary of content used for training","additionalInformation":"\u003cp>\u003cstrong>Article 53(1)(d) - Public summary\u003c/strong>\u003c/p>\u003cp>GPAI providers must make publicly available a \u003cstrong>sufficiently detailed summary\u003c/strong> of the content used for training.\u003c/p>\u003cp>According to a template provided by the AI Office. Purpose: enable copyright holders to exercise their rights.\u003c/p>","synonyms":"","xFields":[{"id":"0","name":"Legal Reference","value":"Art. 53(1)(d)"},{"id":"1","name":"Risk Level","value":"Obligation"}],"relations":[{"id":"cce2ec8c-98f7-d087-02fd-e0c2ee78292d","sourceId":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","sourceName":"GPAI Provider","relationName":"must_publish","targetId":"b11dad26-1466-3ec6-d5b0-f854763a8f97","targetName":"Training Data Summary","description":"Copyright transparency"}]},{"id":"ac6c092b-a530-a265-8adc-c2d6bd35e00c","name":"Transparency Obligations","type":"term","description":"","additionalInformation":"\u003cp>\u003cstrong>Article 50 - Transparency obligations\u003c/strong>\u003c/p>\u003cp>Providers and deployers must ensure transparency for:\u003c/p>\u003col>\u003cli>\u003cstrong>Human interaction systems:\u003c/strong> Inform users they interact with AI\u003c/li>\u003cli>\u003cstrong>Emotion recognition:\u003c/strong> Inform exposed persons\u003c/li>\u003cli>\u003cstrong>Biometric categorisation:\u003c/strong> Inform affected persons\u003c/li>\u003cli>\u003cstrong>Deepfakes:\u003c/strong> Label synthetic content\u003c/li>\u003c/ol>\u003cp>Exceptions for law enforcement and fundamental rights exercise.\u003c/p>","synonyms":"","xFields":[],"relations":[]},{"id":"79dd5aa7-0046-c3c8-f6c1-5fc925a1840d","name":"Violation","type":"term","description":"Non-compliance with an obligation under the Act","additionalInformation":"","synonyms":"","xFields":[],"relations":[{"id":"8ba27fea-580c-4a1e-9b16-7453cfea2578","sourceId":"b03e8c8c-525b-e0eb-f963-7492108706dd","sourceName":"Market Surveillance Authority","relationName":"establishes","targetId":"79dd5aa7-0046-c3c8-f6c1-5fc925a1840d","targetName":"Violation","description":"Formal finding of non-compliance"},{"id":"ab1efd8d-f733-480f-8f4c-00c8f5beb5c8","sourceId":"79dd5aa7-0046-c3c8-f6c1-5fc925a1840d","sourceName":"Violation","relationName":"leads_to","targetId":"931d4857-e673-6bd5-a39c-00f6586cd3d9","targetName":"Penalties (Art. 99)","description":"Enforcement consequence"}]}]</script>
+  <script type="application/json" id="profile-colors">{}</script>
+
+  <script>
+    (function() {
+      const data = JSON.parse(document.getElementById('glossary-data').textContent || '[]');
+      const profileColors = JSON.parse(document.getElementById('profile-colors').textContent || '{}');
+      const termMap = new Map();
+      data.forEach(t => termMap.set(t.id, t));
+
+      let activeTypeFilter = 'ALL';
+      let searchQuery = '';
+      let activeTermIds = new Set();
+      let sidebarViewMode = 'list'; // 'list' | 'tree'
+
+      const genKeywords = [
+        'generalization', 'is a', 'is_a', 'isa',
+        'a type of', 'type of', 'subtype of', 'sub-type of',
+        'kind of', 'extends', 'inherits', 'inherits from',
+        'specialization of', 'is a type of'
+      ];
+
+      function isGeneralization(r) {
+        if (!r) return false;
+        const name = (r.relationName || '').toLowerCase().trim();
+        return genKeywords.includes(name);
+      }
+
+      function getParentIds(t) {
+        if (!t) return [];
+        const parents = new Set();
+        if (t.parent && termMap.has(t.parent)) {
+          parents.add(t.parent);
+        }
+        if (t.relations) {
+          t.relations.forEach(r => {
+            if (r.sourceId === t.id && isGeneralization(r) && termMap.has(r.targetId)) {
+              parents.add(r.targetId);
+            }
+          });
+        }
+        return Array.from(parents);
+      }
+
+      function getChildTerms(parentTermId) {
+        return data.filter(t => getParentIds(t).includes(parentTermId));
+      }
+
+      // Elements
+      const termListEl = document.getElementById('termList');
+      const treeContainerEl = document.getElementById('treeContainer');
+      const typeFiltersEl = document.getElementById('typeFilters');
+      const xFieldFiltersEl = document.getElementById('xFieldFilters');
+      const termCountEl = document.getElementById('termCount');
+      const searchInput = document.getElementById('searchInput');
+      const themeToggle = document.getElementById('themeToggle');
+      const btnPrint = document.getElementById('btnPrint');
+      const btnViewList = document.getElementById('btnViewList');
+      const btnViewTree = document.getElementById('btnViewTree');
+      const welcomeView = document.getElementById('welcomeView');
+      const detailView = document.getElementById('detailView');
+      const contentPane = document.getElementById('contentPane');
+
+      const btnBack = document.getElementById('btnBack');
+
+      if (btnBack) {
+        btnBack.addEventListener('click', () => {
+          document.body.setAttribute('data-mobile-screen', 'index');
+        });
+      }
+
+      // View Mode Toggle
+      btnViewList.addEventListener('click', () => setSidebarViewMode('list'));
+      btnViewTree.addEventListener('click', () => setSidebarViewMode('tree'));
+
+      function setSidebarViewMode(mode) {
+        sidebarViewMode = mode;
+        if (mode === 'list') {
+          btnViewList.classList.add('active');
+          btnViewTree.classList.remove('active');
+          termListEl.style.display = 'block';
+          treeContainerEl.style.display = 'none';
+        } else {
+          btnViewTree.classList.add('active');
+          btnViewList.classList.remove('active');
+          termListEl.style.display = 'none';
+          treeContainerEl.style.display = 'block';
+        }
+        renderSidebar();
+      }
+
+      // Print Handler
+      btnPrint.addEventListener('click', () => window.print());
+
+      // Theme handler
+      themeToggle.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = current === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+      });
+
+      // Keyboard shortcut '/'
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== searchInput) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+
+      // Search input
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        renderSidebar();
+        if (searchQuery) {
+          window.location.hash = encodeURIComponent(searchQuery);
+        } else {
+          window.location.hash = '';
+        }
+      });
+
+      // Extract unique term types
+      const types = Array.from(new Set(data.map(t => t.type))).sort();
+      renderTypeFilters(types);
+
+      function renderTypeFilters(types) {
+        typeFiltersEl.innerHTML = '';
+        const allChip = createFilterChip('ALL', 'All (' + data.length + ')');
+        typeFiltersEl.appendChild(allChip);
+
+        types.forEach(type => {
+          const count = data.filter(t => t.type === type).length;
+          const chip = createFilterChip(type, type + ' (' + count + ')');
+          typeFiltersEl.appendChild(chip);
+        });
+      }
+
+      function createFilterChip(typeKey, label) {
+        const chip = document.createElement('span');
+        chip.className = 'filter-chip' + (activeTypeFilter === typeKey ? ' active' : '');
+        chip.textContent = label;
+        chip.addEventListener('click', () => {
+          activeTypeFilter = typeKey;
+          document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          renderSidebar();
+        });
+        return chip;
+      }
+
+      function renderSidebar() {
+        if (sidebarViewMode === 'list') {
+          renderListSidebar();
+        } else {
+          renderTreeSidebar();
+        }
+      }
+
+      let activeXFieldFilters = {};
+
+      const xFieldsMeta = {};
+      data.forEach(t => {
+        if (t.xFields) {
+          t.xFields.forEach(xf => {
+            if (!xFieldsMeta[xf.name]) {
+              xFieldsMeta[xf.name] = new Set();
+            }
+            if (xf.value !== undefined && xf.value !== null && xf.value !== '') {
+              xFieldsMeta[xf.name].add(String(xf.value));
+            }
+          });
+        }
+      });
+
+      function renderXFieldFilters() {
+        if (!xFieldFiltersEl) return;
+        xFieldFiltersEl.innerHTML = '';
+        const fieldNames = Object.keys(xFieldsMeta).sort();
+        if (fieldNames.length === 0) {
+          xFieldFiltersEl.style.display = 'none';
+          return;
+        }
+
+        fieldNames.forEach(fieldName => {
+          const row = document.createElement('div');
+          row.className = 'xfield-filter-row';
+          
+          const label = document.createElement('span');
+          label.className = 'xfield-filter-label';
+          label.textContent = fieldName;
+          label.title = fieldName;
+
+          const select = document.createElement('select');
+          select.className = 'xfield-filter-select';
+          
+          const defaultOpt = document.createElement('option');
+          defaultOpt.value = '';
+          defaultOpt.textContent = 'All';
+          select.appendChild(defaultOpt);
+
+          Array.from(xFieldsMeta[fieldName]).sort().forEach(val => {
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = val;
+            select.appendChild(opt);
+          });
+
+          select.addEventListener('change', (e) => {
+            if (e.target.value) {
+              activeXFieldFilters[fieldName] = e.target.value;
+            } else {
+              delete activeXFieldFilters[fieldName];
+            }
+            renderSidebar();
+          });
+
+          row.appendChild(label);
+          row.appendChild(select);
+          xFieldFiltersEl.appendChild(row);
+        });
+      }
+
+      renderXFieldFilters();
+
+      function termMatchesFilters(t) {
+        const matchesType = activeTypeFilter === 'ALL' || t.type === activeTypeFilter;
+        let matchesXFields = true;
+        for (const [key, val] of Object.entries(activeXFieldFilters)) {
+          const field = (t.xFields || []).find(xf => xf.name === key);
+          if (!field || String(field.value) !== String(val)) {
+            matchesXFields = false;
+            break;
+          }
+        }
+        let matchesSearch = true;
+        if (searchQuery) {
+          try {
+            const pattern = (searchQuery.includes('*') || searchQuery.includes('?')) ? searchQuery : '*' + searchQuery + '*';
+            const sr = wildcardToRegExp(pattern);
+            matchesSearch = sr.test(t.name) || (t.description && sr.test(t.description));
+          } catch(e) {
+            matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
+          }
+        }
+        return matchesType && matchesXFields && matchesSearch;
+      }
+
+      function renderListSidebar() {
+        termListEl.innerHTML = '';
+        const filtered = data.filter(termMatchesFilters);
+
+        termCountEl.textContent = filtered.length + ' term' + (filtered.length === 1 ? '' : 's');
+
+        filtered.forEach(t => {
+          const li = document.createElement('li');
+          li.className = 'term-item' + (activeTermIds.has(t.id) ? ' active' : '');
+          
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'term-item-name';
+          nameSpan.textContent = t.name;
+
+          li.appendChild(nameSpan);
+
+          const termTypeLower = (t.type || '').toLowerCase();
+          if (termTypeLower !== 'term' || profileColors[t.type]) {
+            const badge = document.createElement('span');
+            badge.className = 'type-badge';
+            badge.textContent = t.type;
+            if (profileColors[t.type]) {
+              badge.style.background = profileColors[t.type];
+              badge.style.color = '#ffffff';
+            }
+            li.appendChild(badge);
+          }
+
+          li.addEventListener('click', () => {
+            window.location.hash = encodeURIComponent(t.name);
+          });
+          termListEl.appendChild(li);
+        });
+      }
+
+      function renderTreeSidebar() {
+        treeContainerEl.innerHTML = '';
+        const rootTerms = data.filter(t => getParentIds(t).length === 0);
+
+        const ul = document.createElement('ul');
+        ul.className = 'tree-list';
+
+        const hasAnyFilters = activeTypeFilter !== 'ALL' || Object.keys(activeXFieldFilters).length > 0 || searchQuery !== '';
+        
+        let matchCount = 0;
+        if (hasAnyFilters) {
+          matchCount = data.filter(termMatchesFilters).length;
+        } else {
+          matchCount = data.length;
+        }
+        termCountEl.textContent = matchCount + ' term' + (matchCount === 1 ? '' : 's');
+
+        rootTerms.forEach(root => {
+          const nodeInfo = buildTreeNode(root, new Set(), hasAnyFilters);
+          if (nodeInfo && nodeInfo.el) {
+            ul.appendChild(nodeInfo.el);
+          }
+        });
+
+        treeContainerEl.appendChild(ul);
+
+        // Auto-expand active branches in tree view
+        if (activeTermIds.size > 0) {
+          activeTermIds.forEach(id => {
+            const activeRows = treeContainerEl.querySelectorAll('[data-term-id="' + id + '"]');
+            activeRows.forEach(row => {
+              row.classList.add('active');
+              let parentUl = row.closest('.tree-children');
+              while (parentUl) {
+                parentUl.style.display = 'block';
+                const toggleEl = parentUl.previousElementSibling ? parentUl.previousElementSibling.querySelector('.tree-toggle') : null;
+                if (toggleEl) toggleEl.textContent = '▼';
+                parentUl = parentUl.parentElement ? parentUl.parentElement.closest('.tree-children') : null;
+              }
+            });
+          });
+        }
+      }
+
+      function buildTreeNode(term, visitedPath, hasAnyFilters) {
+        if (visitedPath.has(term.id)) return null; // Circular hierarchy prevention
+        const currentPath = new Set(visitedPath);
+        currentPath.add(term.id);
+
+        const children = getChildTerms(term.id);
+        const isActive = activeTermIds.has(term.id);
+        const isDirectMatch = termMatchesFilters(term);
+
+        const childNodes = [];
+        let hasMatchingChild = false;
+        children.forEach(c => {
+          const cNodeInfo = buildTreeNode(c, currentPath, hasAnyFilters);
+          if (cNodeInfo && cNodeInfo.el) {
+            childNodes.push(cNodeInfo.el);
+            if (cNodeInfo.hasMatch) {
+              hasMatchingChild = true;
+            }
+          }
+        });
+
+        if (hasAnyFilters && !isDirectMatch && !hasMatchingChild) {
+          return null;
+        }
+
+        const hasChildren = childNodes.length > 0;
+
+        const li = document.createElement('li');
+        li.className = 'tree-item';
+
+        const row = document.createElement('div');
+        row.className = 'tree-row' + (isActive ? ' active' : '') + (hasAnyFilters && !isDirectMatch ? ' indirect-match' : '');
+        row.setAttribute('data-term-id', term.id);
+        if (hasAnyFilters && !isDirectMatch) {
+          row.style.opacity = '0.6';
+        }
+
+        const toggle = document.createElement('span');
+        toggle.className = 'tree-toggle';
+        
+        const isExpanded = hasAnyFilters && hasMatchingChild;
+        toggle.textContent = hasChildren ? (isExpanded ? '▼' : '▶') : '•';
+
+        const label = document.createElement('span');
+        label.className = 'tree-label';
+        label.textContent = term.name;
+
+        row.appendChild(toggle);
+        row.appendChild(label);
+
+        // Hide badge if type is standard 'term' or 'TERM' to reduce noise, unless custom profile color or non-standard type
+        const termTypeLower = (term.type || '').toLowerCase();
+        if (termTypeLower !== 'term' || profileColors[term.type]) {
+          const badge = document.createElement('span');
+          badge.className = 'type-badge';
+          badge.textContent = term.type;
+          if (profileColors[term.type]) {
+            badge.style.background = profileColors[term.type];
+            badge.style.color = '#ffffff';
+          }
+          row.appendChild(badge);
+        }
+
+        li.appendChild(row);
+
+        row.addEventListener('click', () => {
+          window.location.hash = encodeURIComponent(term.name);
+        });
+
+        if (hasChildren) {
+          const childUl = document.createElement('ul');
+          childUl.className = 'tree-children';
+          childUl.style.display = isExpanded ? 'block' : 'none';
+
+          toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = childUl.style.display === 'none';
+            childUl.style.display = isHidden ? 'block' : 'none';
+            toggle.textContent = isHidden ? '▼' : '▶';
+          });
+
+          childNodes.forEach(childEl => childUl.appendChild(childEl));
+          li.appendChild(childUl);
+        }
+
+        return { el: li, hasMatch: isDirectMatch || hasMatchingChild };
+      }
+
+      const includeAutoLinks = true;
+      const rawTermMap = {"accuracy & cybersecurity":{"name":"Accuracy & Cybersecurity","id":"4c9afdb6-e758-e4a5-f2f7-51449d06c36e","variantName":"Accuracy & Cybersecurity"},"accuracy & cybersecurities":{"name":"Accuracy & Cybersecurity","id":"4c9afdb6-e758-e4a5-f2f7-51449d06c36e","variantName":"Accuracy & Cybersecurity"},"adversarial testing":{"name":"Adversarial Testing","id":"893b5730-2fd4-bea4-addb-23bfff6b33b8","variantName":"Adversarial Testing"},"adversarial testings":{"name":"Adversarial Testing","id":"893b5730-2fd4-bea4-addb-23bfff6b33b8","variantName":"Adversarial Testing"},"ai deployer":{"name":"AI Deployer","id":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","variantName":"AI Deployer"},"ai deployers":{"name":"AI Deployer","id":"d0dc3fc8-7749-a5f8-eeb0-06abcfc97aac","variantName":"AI Deployer"},"ai literacy":{"name":"AI Literacy","id":"90bef3fd-3f46-e948-800b-605bfbe48dc1","variantName":"AI Literacy"},"ai literacies":{"name":"AI Literacy","id":"90bef3fd-3f46-e948-800b-605bfbe48dc1","variantName":"AI Literacy"},"ai model":{"name":"AI Model","id":"6a4e299a-2ecc-17c5-af32-6c0cd795992e","variantName":"AI Model"},"ai models":{"name":"AI Model","id":"6a4e299a-2ecc-17c5-af32-6c0cd795992e","variantName":"AI Model"},"ai provider":{"name":"AI Provider","id":"ad293abc-4145-bd84-bccd-7c6573a232c1","variantName":"AI Provider"},"ai providers":{"name":"AI Provider","id":"ad293abc-4145-bd84-bccd-7c6573a232c1","variantName":"AI Provider"},"annex iii categories":{"name":"Annex III Categories","id":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","variantName":"Annex III Categories"},"annex iii category":{"name":"Annex III Categories","id":"3b14adb1-f7fc-e0a8-7eed-d4a0546f0017","variantName":"Annex III Categories"},"annex iii: biometrics":{"name":"Annex III: Biometrics","id":"14e49b2d-be9f-1af0-593a-77c4ba534f02","variantName":"Annex III: Biometrics"},"annex iii: biometric":{"name":"Annex III: Biometrics","id":"14e49b2d-be9f-1af0-593a-77c4ba534f02","variantName":"Annex III: Biometrics"},"annex iii: critical infrastructure":{"name":"Annex III: Critical Infrastructure","id":"38e97f82-de01-c3dd-d873-fc2bb4e16d5d","variantName":"Annex III: Critical Infrastructure"},"annex iii: critical infrastructures":{"name":"Annex III: Critical Infrastructure","id":"38e97f82-de01-c3dd-d873-fc2bb4e16d5d","variantName":"Annex III: Critical Infrastructure"},"annex iii: education":{"name":"Annex III: Education","id":"2e231e7b-c3d2-6eef-4e23-b61c4ebb3332","variantName":"Annex III: Education"},"annex iii: educations":{"name":"Annex III: Education","id":"2e231e7b-c3d2-6eef-4e23-b61c4ebb3332","variantName":"Annex III: Education"},"annex iii: employment":{"name":"Annex III: Employment","id":"a80e2721-4f45-5b5e-1c2b-98c7b3f5c434","variantName":"Annex III: Employment"},"annex iii: employments":{"name":"Annex III: Employment","id":"a80e2721-4f45-5b5e-1c2b-98c7b3f5c434","variantName":"Annex III: Employment"},"annex iii: essential services":{"name":"Annex III: Essential Services","id":"e4aad613-1d6f-77f2-9758-d13b0cc9fd98","variantName":"Annex III: Essential Services"},"annex iii: essential service":{"name":"Annex III: Essential Services","id":"e4aad613-1d6f-77f2-9758-d13b0cc9fd98","variantName":"Annex III: Essential Services"},"annex iii: justice":{"name":"Annex III: Justice","id":"f23ebc95-b8b2-e1fa-2dc9-ffc3c009af70","variantName":"Annex III: Justice"},"annex iii: justices":{"name":"Annex III: Justice","id":"f23ebc95-b8b2-e1fa-2dc9-ffc3c009af70","variantName":"Annex III: Justice"},"annex iii: law enforcement":{"name":"Annex III: Law Enforcement","id":"f9c0bb23-e629-ba57-8fdf-dafc0f8fba63","variantName":"Annex III: Law Enforcement"},"annex iii: law enforcements":{"name":"Annex III: Law Enforcement","id":"f9c0bb23-e629-ba57-8fdf-dafc0f8fba63","variantName":"Annex III: Law Enforcement"},"annex iii: migration":{"name":"Annex III: Migration","id":"eea0bfec-acba-3846-f4be-ae04f0970a62","variantName":"Annex III: Migration"},"annex iii: migrations":{"name":"Annex III: Migration","id":"eea0bfec-acba-3846-f4be-ae04f0970a62","variantName":"Annex III: Migration"},"art 6(3) exception":{"name":"Art 6(3) Exception","id":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","variantName":"Art 6(3) Exception"},"art 6(3) exceptions":{"name":"Art 6(3) Exception","id":"9f9728ec-ce90-38ad-aad7-f17e87a96be3","variantName":"Art 6(3) Exception"},"authorized representative":{"name":"Authorized Representative","id":"081b3878-1251-128e-514d-bd729ea0a7bd","variantName":"Authorized Representative"},"authorized representatives":{"name":"Authorized Representative","id":"081b3878-1251-128e-514d-bd729ea0a7bd","variantName":"Authorized Representative"},"biometric categorization":{"name":"Biometric Categorization","id":"49640ee4-12bf-3cab-b143-14992fc04360","variantName":"Biometric Categorization"},"biometric categorizations":{"name":"Biometric Categorization","id":"49640ee4-12bf-3cab-b143-14992fc04360","variantName":"Biometric Categorization"},"ce marking":{"name":"CE Marking","id":"47167280-c023-1888-3b65-16e652d93491","variantName":"CE Marking"},"ce markings":{"name":"CE Marking","id":"47167280-c023-1888-3b65-16e652d93491","variantName":"CE Marking"},"certificate of conformity":{"name":"Certificate of Conformity","id":"47dc37b9-14df-6f38-6b39-ee883036199d","variantName":"Certificate of Conformity"},"certificate of conformities":{"name":"Certificate of Conformity","id":"47dc37b9-14df-6f38-6b39-ee883036199d","variantName":"Certificate of Conformity"},"chatbots":{"name":"Chatbots","id":"29d54da4-0732-5b38-cf4c-76c14ef35bd0","variantName":"Chatbots"},"chatbot":{"name":"Chatbots","id":"29d54da4-0732-5b38-cf4c-76c14ef35bd0","variantName":"Chatbots"},"code of conduct":{"name":"Code of Conduct","id":"aea75e3c-8c74-fd08-ffd6-2516e5ae4d99","variantName":"Code of Conduct"},"code of conducts":{"name":"Code of Conduct","id":"aea75e3c-8c74-fd08-ffd6-2516e5ae4d99","variantName":"Code of Conduct"},"codes of practice":{"name":"Codes of Practice","id":"050fc138-8d51-bfe1-bffe-99d394af024a","variantName":"Codes of Practice"},"codes of practices":{"name":"Codes of Practice","id":"050fc138-8d51-bfe1-bffe-99d394af024a","variantName":"Codes of Practice"},"cognitive behavioral manipulation":{"name":"Cognitive Behavioral Manipulation","id":"b46154b5-3230-dc93-dbe6-e5b275ec684b","variantName":"Cognitive Behavioral Manipulation"},"cognitive behavioral manipulations":{"name":"Cognitive Behavioral Manipulation","id":"b46154b5-3230-dc93-dbe6-e5b275ec684b","variantName":"Cognitive Behavioral Manipulation"},"complaint":{"name":"Complaint","id":"397c07a6-cde7-e6b2-fd7b-83c0375ab978","variantName":"Complaint"},"complaints":{"name":"Complaint","id":"397c07a6-cde7-e6b2-fd7b-83c0375ab978","variantName":"Complaint"},"compliance mandate":{"name":"Compliance Mandate","id":"d8d7e926-e1f0-09d4-7fb4-d1677dbdeecc","variantName":"Compliance Mandate"},"compliance mandates":{"name":"Compliance Mandate","id":"d8d7e926-e1f0-09d4-7fb4-d1677dbdeecc","variantName":"Compliance Mandate"},"conformity assessment":{"name":"Conformity Assessment","id":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","variantName":"Conformity Assessment"},"conformity assessments":{"name":"Conformity Assessment","id":"86a1bbea-afa3-ff12-0590-8ca6a975c2c2","variantName":"Conformity Assessment"},"copyright policy":{"name":"Copyright Policy","id":"96a713d7-e04f-f532-0d9b-40c790eb0f65","variantName":"Copyright Policy"},"copyright policies":{"name":"Copyright Policy","id":"96a713d7-e04f-f532-0d9b-40c790eb0f65","variantName":"Copyright Policy"},"corrective action":{"name":"Corrective Action","id":"b15ca22c-8937-de43-78cc-247c06d1b643","variantName":"Corrective Action"},"corrective actions":{"name":"Corrective Action","id":"b15ca22c-8937-de43-78cc-247c06d1b643","variantName":"Corrective Action"},"data governance":{"name":"Data Governance","id":"f69111c0-48f6-137a-0b31-5ff7110f4d28","variantName":"Data Governance"},"data governances":{"name":"Data Governance","id":"f69111c0-48f6-137a-0b31-5ff7110f4d28","variantName":"Data Governance"},"decision explanation":{"name":"Decision Explanation","id":"b782c4bc-7e22-4b00-d70a-c715bc35f182","variantName":"Decision Explanation"},"decision explanations":{"name":"Decision Explanation","id":"b782c4bc-7e22-4b00-d70a-c715bc35f182","variantName":"Decision Explanation"},"declaration of conformity":{"name":"Declaration of Conformity","id":"728ed521-6afe-7438-2b7a-ee6acf712ac9","variantName":"Declaration of Conformity"},"declaration of conformities":{"name":"Declaration of Conformity","id":"728ed521-6afe-7438-2b7a-ee6acf712ac9","variantName":"Declaration of Conformity"},"deepfakes":{"name":"Deepfakes","id":"1d919c45-0f75-25bb-8a13-d5566344e3af","variantName":"Deepfakes"},"deepfake":{"name":"Deepfakes","id":"1d919c45-0f75-25bb-8a13-d5566344e3af","variantName":"Deepfakes"},"distributor":{"name":"Distributor","id":"a7184bc1-5ac4-b4e0-5c5d-7b2c2dec05bc","variantName":"Distributor"},"distributors":{"name":"Distributor","id":"a7184bc1-5ac4-b4e0-5c5d-7b2c2dec05bc","variantName":"Distributor"},"downstream info (annex xii)":{"name":"Downstream Info (Annex XII)","id":"3fe62d55-1308-4180-89a2-c641bf502a15","variantName":"Downstream Info (Annex XII)"},"downstream info (annex xii)s":{"name":"Downstream Info (Annex XII)","id":"3fe62d55-1308-4180-89a2-c641bf502a15","variantName":"Downstream Info (Annex XII)"},"emotion recognition":{"name":"Emotion Recognition","id":"f4a5abfb-ca69-91f0-45ab-10f331fd3192","variantName":"Emotion Recognition"},"emotion recognitions":{"name":"Emotion Recognition","id":"f4a5abfb-ca69-91f0-45ab-10f331fd3192","variantName":"Emotion Recognition"},"energy consumption":{"name":"Energy Consumption","id":"e4be2c45-21f1-c401-dc22-94f5eb858c7f","variantName":"Energy Consumption"},"energy consumptions":{"name":"Energy Consumption","id":"e4be2c45-21f1-c401-dc22-94f5eb858c7f","variantName":"Energy Consumption"},"eu anchor":{"name":"EU Anchor","id":"d87d4dc1-ca36-cda8-ed26-3e72f70e003e","variantName":"EU Anchor"},"eu anchors":{"name":"EU Anchor","id":"d87d4dc1-ca36-cda8-ed26-3e72f70e003e","variantName":"EU Anchor"},"eu database (art. 71)":{"name":"EU Database (Art. 71)","id":"dba20eab-347a-639e-b7b5-edd221162714","variantName":"EU Database (Art. 71)"},"eu database (art. 71)s":{"name":"EU Database (Art. 71)","id":"dba20eab-347a-639e-b7b5-edd221162714","variantName":"EU Database (Art. 71)"},"european ai board":{"name":"European AI Board","id":"817689f1-f4cc-8770-7a12-1cc841901e27","variantName":"European AI Board"},"european ai boards":{"name":"European AI Board","id":"817689f1-f4cc-8770-7a12-1cc841901e27","variantName":"European AI Board"},"european ai office":{"name":"European AI Office","id":"fcf9ffe6-745f-b76d-2c31-a452a2fb64dc","variantName":"European AI Office"},"european ai offices":{"name":"European AI Office","id":"fcf9ffe6-745f-b76d-2c31-a452a2fb64dc","variantName":"European AI Office"},"european commission":{"name":"European Commission","id":"75eb1fd3-8591-567b-7f1b-eb5e41ad7453","variantName":"European Commission"},"european commissions":{"name":"European Commission","id":"75eb1fd3-8591-567b-7f1b-eb5e41ad7453","variantName":"European Commission"},"exception documentation":{"name":"Exception Documentation","id":"2454a690-b7f1-fc0c-3a10-2960d68378ce","variantName":"Exception Documentation"},"exception documentations":{"name":"Exception Documentation","id":"2454a690-b7f1-fc0c-3a10-2960d68378ce","variantName":"Exception Documentation"},"fria (art. 27)":{"name":"FRIA (Art. 27)","id":"16c9bf31-e020-1806-8e44-4752ac9f07a6","variantName":"FRIA (Art. 27)"},"fria (art. 27)s":{"name":"FRIA (Art. 27)","id":"16c9bf31-e020-1806-8e44-4752ac9f07a6","variantName":"FRIA (Art. 27)"},"fria results":{"name":"FRIA Results","id":"355e2fc8-363f-ea9f-70f7-f4843ca74dba","variantName":"FRIA Results"},"fria result":{"name":"FRIA Results","id":"355e2fc8-363f-ea9f-70f7-f4843ca74dba","variantName":"FRIA Results"},"gpai model":{"name":"GPAI Model","id":"5dc8fde1-81c9-0bb0-8164-c5d339b727de","variantName":"GPAI Model"},"gpai models":{"name":"GPAI Model","id":"5dc8fde1-81c9-0bb0-8164-c5d339b727de","variantName":"GPAI Model"},"gpai provider":{"name":"GPAI Provider","id":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","variantName":"GPAI Provider"},"gpai providers":{"name":"GPAI Provider","id":"7ebccf4a-45fd-ab7a-221b-4efd4651ddef","variantName":"GPAI Provider"},"gpai tech docs (annex xi)":{"name":"GPAI Tech Docs (Annex XI)","id":"4d72451a-7b8c-1eb1-2cc3-4763a3176f93","variantName":"GPAI Tech Docs (Annex XI)"},"gpai tech docs (annex xi)s":{"name":"GPAI Tech Docs (Annex XI)","id":"4d72451a-7b8c-1eb1-2cc3-4763a3176f93","variantName":"GPAI Tech Docs (Annex XI)"},"gpai with systemic risk":{"name":"GPAI with Systemic Risk","id":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","variantName":"GPAI with Systemic Risk"},"gpai with systemic risks":{"name":"GPAI with Systemic Risk","id":"c607fe6c-d898-87f6-18fa-697a9ee4d20e","variantName":"GPAI with Systemic Risk"},"high-risk ai system":{"name":"High-Risk AI System","id":"829a45e3-51aa-c4d3-2c64-32f42d26989a","variantName":"High-Risk AI System"},"high-risk ai systems":{"name":"High-Risk AI System","id":"829a45e3-51aa-c4d3-2c64-32f42d26989a","variantName":"High-Risk AI System"},"human oversight":{"name":"Human Oversight","id":"87eda482-7896-7cc1-b779-bc43455635d8","variantName":"Human Oversight"},"human oversights":{"name":"Human Oversight","id":"87eda482-7896-7cc1-b779-bc43455635d8","variantName":"Human Oversight"},"importer":{"name":"Importer","id":"e9e1f3d8-14a7-03bb-9c03-eec5044c8bbe","variantName":"Importer"},"importers":{"name":"Importer","id":"e9e1f3d8-14a7-03bb-9c03-eec5044c8bbe","variantName":"Importer"},"incident reporting":{"name":"Incident Reporting","id":"53002712-a1ca-fd50-f0e8-71bb04a61163","variantName":"Incident Reporting"},"incident reportings":{"name":"Incident Reporting","id":"53002712-a1ca-fd50-f0e8-71bb04a61163","variantName":"Incident Reporting"},"instructions for use":{"name":"Instructions for Use","id":"300a994b-1be2-8e25-1d61-420916dee01e","variantName":"Instructions for Use"},"instructions for uses":{"name":"Instructions for Use","id":"300a994b-1be2-8e25-1d61-420916dee01e","variantName":"Instructions for Use"},"interaction disclosure":{"name":"Interaction Disclosure","id":"c08eb570-1dcf-6eb1-134b-32333b495515","variantName":"Interaction Disclosure"},"interaction disclosures":{"name":"Interaction Disclosure","id":"c08eb570-1dcf-6eb1-134b-32333b495515","variantName":"Interaction Disclosure"},"market surveillance authority":{"name":"Market Surveillance Authority","id":"b03e8c8c-525b-e0eb-f963-7492108706dd","variantName":"Market Surveillance Authority"},"market surveillance authorities":{"name":"Market Surveillance Authority","id":"b03e8c8c-525b-e0eb-f963-7492108706dd","variantName":"Market Surveillance Authority"},"natural person":{"name":"Natural Person","id":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","variantName":"Natural Person"},"natural people":{"name":"Natural Person","id":"3379ac0c-e1e2-9048-c1e2-7f3d913e896d","variantName":"Natural Person"},"notified body":{"name":"Notified Body","id":"77bd8d37-427d-e467-0b3b-620ab292afe4","variantName":"Notified Body"},"notified bodies":{"name":"Notified Body","id":"77bd8d37-427d-e467-0b3b-620ab292afe4","variantName":"Notified Body"},"penalties (art. 99)":{"name":"Penalties (Art. 99)","id":"931d4857-e673-6bd5-a39c-00f6586cd3d9","variantName":"Penalties (Art. 99)"},"penalties (art. 99)s":{"name":"Penalties (Art. 99)","id":"931d4857-e673-6bd5-a39c-00f6586cd3d9","variantName":"Penalties (Art. 99)"},"post-market monitoring system":{"name":"Post-Market Monitoring System","id":"6518e503-d02f-da7b-6267-bd0abd166d27","variantName":"Post-Market Monitoring System"},"post-market monitoring systems":{"name":"Post-Market Monitoring System","id":"6518e503-d02f-da7b-6267-bd0abd166d27","variantName":"Post-Market Monitoring System"},"predictive policing":{"name":"Predictive Policing","id":"bbfe65de-1bff-67bb-420b-a8d916613bc6","variantName":"Predictive Policing"},"predictive policings":{"name":"Predictive Policing","id":"bbfe65de-1bff-67bb-420b-a8d916613bc6","variantName":"Predictive Policing"},"product manufacturer":{"name":"Product Manufacturer","id":"075fdce9-eb7f-9e6c-a563-1051bb26c2ad","variantName":"Product Manufacturer"},"product manufacturers":{"name":"Product Manufacturer","id":"075fdce9-eb7f-9e6c-a563-1051bb26c2ad","variantName":"Product Manufacturer"},"profiling":{"name":"Profiling","id":"f058bf86-b5cc-136c-dcd9-652a676df5ca","variantName":"Profiling"},"profilings":{"name":"Profiling","id":"f058bf86-b5cc-136c-dcd9-652a676df5ca","variantName":"Profiling"},"prohibited practice":{"name":"Prohibited Practice","id":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","variantName":"Prohibited Practice"},"prohibited practices":{"name":"Prohibited Practice","id":"349879f2-10b1-8b25-0d8d-7e2d0cb29f41","variantName":"Prohibited Practice"},"quality management system":{"name":"Quality Management System","id":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","variantName":"Quality Management System"},"quality management systems":{"name":"Quality Management System","id":"982c0650-f931-23e7-8f00-bcbb1ae82f0a","variantName":"Quality Management System"},"real-time remote biometric id":{"name":"Real-time Remote Biometric ID","id":"c85c388f-ea60-a0f7-7e74-018cfae19159","variantName":"Real-time Remote Biometric ID"},"real-time remote biometric ids":{"name":"Real-time Remote Biometric ID","id":"c85c388f-ea60-a0f7-7e74-018cfae19159","variantName":"Real-time Remote Biometric ID"},"record keeping":{"name":"Record Keeping","id":"da72cffa-0935-6853-5bc4-64878317071a","variantName":"Record Keeping"},"record keepings":{"name":"Record Keeping","id":"da72cffa-0935-6853-5bc4-64878317071a","variantName":"Record Keeping"},"registration (art. 49)":{"name":"Registration (Art. 49)","id":"01e3c32f-8996-b78f-94d9-36633d8f067d","variantName":"Registration (Art. 49)"},"registration (art. 49)s":{"name":"Registration (Art. 49)","id":"01e3c32f-8996-b78f-94d9-36633d8f067d","variantName":"Registration (Art. 49)"},"regulatory sandbox":{"name":"Regulatory Sandbox","id":"28907db9-ced6-f968-3ff2-84a171ea4b40","variantName":"Regulatory Sandbox"},"regulatory sandboxes":{"name":"Regulatory Sandbox","id":"28907db9-ced6-f968-3ff2-84a171ea4b40","variantName":"Regulatory Sandbox"},"right to explanation":{"name":"Right to Explanation","id":"b868569c-a7b6-e1a6-6321-338f091c68f8","variantName":"Right to Explanation"},"right to explanations":{"name":"Right to Explanation","id":"b868569c-a7b6-e1a6-6321-338f091c68f8","variantName":"Right to Explanation"},"right to human review":{"name":"Right to Human Review","id":"69b91205-6482-0869-e4a0-b7f985cbb0ff","variantName":"Right to Human Review"},"right to human reviews":{"name":"Right to Human Review","id":"69b91205-6482-0869-e4a0-b7f985cbb0ff","variantName":"Right to Human Review"},"right to lodge a complaint":{"name":"Right to Lodge a Complaint","id":"b041011b-4df2-d5db-4630-4361412032fa","variantName":"Right to Lodge a Complaint"},"right to lodge a complaints":{"name":"Right to Lodge a Complaint","id":"b041011b-4df2-d5db-4630-4361412032fa","variantName":"Right to Lodge a Complaint"},"risk assessment system":{"name":"Risk Assessment System","id":"25d45a2a-b12d-0530-8307-7442f5201525","variantName":"Risk Assessment System"},"risk assessment systems":{"name":"Risk Assessment System","id":"25d45a2a-b12d-0530-8307-7442f5201525","variantName":"Risk Assessment System"},"serious incident":{"name":"Serious Incident","id":"1402d0ee-5e9a-c32c-c6c5-f4624d30ca2a","variantName":"Serious Incident"},"serious incidents":{"name":"Serious Incident","id":"1402d0ee-5e9a-c32c-c6c5-f4624d30ca2a","variantName":"Serious Incident"},"social scoring":{"name":"Social Scoring","id":"0d186b9f-d350-c87d-9b32-8196476070c4","variantName":"Social Scoring"},"social scorings":{"name":"Social Scoring","id":"0d186b9f-d350-c87d-9b32-8196476070c4","variantName":"Social Scoring"},"synthetic content labeling":{"name":"Synthetic Content Labeling","id":"1d471761-94f4-715b-ba40-6313bedfffdf","variantName":"Synthetic Content Labeling"},"synthetic content labelings":{"name":"Synthetic Content Labeling","id":"1d471761-94f4-715b-ba40-6313bedfffdf","variantName":"Synthetic Content Labeling"},"systemic risk mitigation":{"name":"Systemic Risk Mitigation","id":"04f8d7a9-1836-9075-aa1b-86f4e565b635","variantName":"Systemic Risk Mitigation"},"systemic risk mitigations":{"name":"Systemic Risk Mitigation","id":"04f8d7a9-1836-9075-aa1b-86f4e565b635","variantName":"Systemic Risk Mitigation"},"technical documentation":{"name":"Technical Documentation","id":"1a2d6190-e55f-ead1-2c0d-347bc2d6a1af","variantName":"Technical Documentation"},"technical documentations":{"name":"Technical Documentation","id":"1a2d6190-e55f-ead1-2c0d-347bc2d6a1af","variantName":"Technical Documentation"},"training data summary":{"name":"Training Data Summary","id":"b11dad26-1466-3ec6-d5b0-f854763a8f97","variantName":"Training Data Summary"},"training data summaries":{"name":"Training Data Summary","id":"b11dad26-1466-3ec6-d5b0-f854763a8f97","variantName":"Training Data Summary"},"transparency obligations":{"name":"Transparency Obligations","id":"ac6c092b-a530-a265-8adc-c2d6bd35e00c","variantName":"Transparency Obligations"},"transparency obligation":{"name":"Transparency Obligations","id":"ac6c092b-a530-a265-8adc-c2d6bd35e00c","variantName":"Transparency Obligations"},"violation":{"name":"Violation","id":"79dd5aa7-0046-c3c8-f6c1-5fc925a1840d","variantName":"Violation"},"violations":{"name":"Violation","id":"79dd5aa7-0046-c3c8-f6c1-5fc925a1840d","variantName":"Violation"}};
+      const linkingTermMap = new Map(Object.entries(rawTermMap));
+      const globalRegexSource = "\\b(Annex III: Critical Infrastructures|Annex III: Critical Infrastructure|Cognitive Behavioral Manipulations|Cognitive Behavioral Manipulation|Market Surveillance Authorities|Post\\-Market Monitoring Systems|Real\\-time Remote Biometric IDS|Annex III: Essential Services|Market Surveillance Authority|Post\\-Market Monitoring System|Real\\-time Remote Biometric ID|Annex III: Essential Service|Downstream Info \\(Annex XII\\)s|Annex III: Law Enforcements|Certificate of Conformities|Declaration of Conformities|Downstream Info \\(Annex XII\\)|Right to Lodge a Complaints|Synthetic Content Labelings|Accuracy & Cybersecurities|Annex III: Law Enforcement|Authorized Representatives|GPAI Tech Docs \\(Annex XI\\)s|Quality Management Systems|Right to Lodge a Complaint|Synthetic Content Labeling|Authorized Representative|Biometric Categorizations|Certificate of Conformity|Declaration of Conformity|GPAI Tech Docs \\(Annex XI\\)|Quality Management System|Systemic Risk Mitigations|Accuracy & Cybersecurity|Biometric Categorization|Exception Documentations|GPAI with Systemic Risks|Systemic Risk Mitigation|Technical Documentations|Transparency Obligations|Exception Documentation|GPAI with Systemic Risk|Interaction Disclosures|Registration \\(Art\\. 49\\)s|Risk Assessment Systems|Technical Documentation|Training Data Summaries|Transparency Obligation|Annex III: Employments|Conformity Assessments|EU Database \\(Art\\. 71\\)s|Interaction Disclosure|Registration \\(Art\\. 49\\)|Right to Human Reviews|Risk Assessment System|Annex III: Biometrics|Annex III: Educations|Annex III: Employment|Annex III: Migrations|Conformity Assessment|Decision Explanations|EU Database \\(Art\\. 71\\)|Instructions for Uses|Product Manufacturers|Right to Explanations|Right to Human Review|Training Data Summary|Adversarial Testings|Annex III Categories|Annex III: Biometric|Annex III: Education|Annex III: Migration|Decision Explanation|Emotion Recognitions|European Commissions|High\\-Risk AI Systems|Instructions for Use|Penalties \\(Art\\. 99\\)s|Predictive Policings|Product Manufacturer|Prohibited Practices|Regulatory Sandboxes|Right to Explanation|Adversarial Testing|Annex III: Justices|Art 6\\(3\\) Exceptions|Compliance Mandates|Emotion Recognition|Energy Consumptions|European AI Offices|European Commission|High\\-Risk AI System|Incident Reportings|Penalties \\(Art\\. 99\\)|Predictive Policing|Prohibited Practice|Annex III Category|Annex III: Justice|Art 6\\(3\\) Exception|Codes of Practices|Compliance Mandate|Copyright Policies|Corrective Actions|Energy Consumption|European AI Boards|European AI Office|Incident Reporting|Regulatory Sandbox|Codes of Practice|Corrective Action|European AI Board|Serious Incidents|Code of Conducts|Copyright Policy|Data Governances|Human Oversights|Serious Incident|Code of Conduct|Data Governance|FRIA \\(Art\\. 27\\)s|Human Oversight|Notified Bodies|Record Keepings|Social Scorings|FRIA \\(Art\\. 27\\)|GPAI Providers|Natural Person|Natural People|Record Keeping|Social Scoring|AI Literacies|GPAI Provider|Notified Body|AI Deployers|AI Providers|Distributors|FRIA Results|AI Deployer|AI Literacy|AI Provider|CE Markings|Distributor|FRIA Result|GPAI Models|CE Marking|Complaints|EU Anchors|GPAI Model|Profilings|Violations|AI Models|Complaint|Deepfakes|EU Anchor|Importers|Profiling|Violation|AI Model|Chatbots|Deepfake|Importer|Chatbot)\\b";
+      
+      function buildTermMatchingEngine() {
+        if (linkingTermMap.size === 0) return null;
+        const regex = new RegExp(globalRegexSource, 'gi');
+        return { termMap: linkingTermMap, regex };
+      }
+
+      function autoLinkText(text, currentTermId) {
+        if (!text) return '';
+        if (!includeAutoLinks) return escapeHtml(text);
+
+        const engine = buildTermMatchingEngine();
+        if (!engine) return escapeHtml(text);
+
+        const { termMap, regex } = engine;
+        let lastIdx = 0;
+        let result = '';
+
+        const matches = Array.from(text.matchAll(regex));
+        
+        for (const match of matches) {
+          const matchText = match[1] || '';
+          const matchStart = match.index;
+          const matchedTerm = termMap.get(matchText.toLowerCase());
+
+          result += escapeHtml(text.substring(lastIdx, matchStart));
+
+          if (matchedTerm && matchedTerm.id !== currentTermId) {
+            result += '<a href="#' + encodeURIComponent(matchedTerm.name) + '">' + escapeHtml(matchText) + '</a>';
+          } else {
+            result += escapeHtml(matchText);
+          }
+
+          lastIdx = matchStart + matchText.length;
+        }
+
+        result += escapeHtml(text.substring(lastIdx));
+        return result;
+      }
+
+
+
+      function getTaxonomyBreadcrumbs(term) {
+        const path = [];
+        let curr = term;
+        const visited = new Set();
+        let pIds = getParentIds(curr);
+        while (pIds.length > 0) {
+          const pId = pIds[0];
+          if (!termMap.has(pId) || visited.has(pId)) break;
+          visited.add(pId);
+          const p = termMap.get(pId);
+          path.unshift(p);
+          curr = p;
+          pIds = getParentIds(curr);
+        }
+        return path;
+      }
+
+      function sanitizeHtml(html) {
+        if (!html) return '';
+        // Safe DOMParser sanitization for Quill HTML content
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        const allowedTags = new Set([
+          'b', 'i', 'strong', 'em', 'u', 's', 'br', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+          'ul', 'ol', 'li', 'blockquote', 'code', 'pre', 'span', 'a', 'table', 'thead', 'tbody', 'tr', 'td', 'th'
+        ]);
+
+        function sanitizeNode(node) {
+          if (node.nodeType === Node.TEXT_NODE) return node.cloneNode(false);
+          if (node.nodeType !== Node.ELEMENT_NODE) return null;
+          const element = node;
+          const tagName = element.tagName.toLowerCase();
+
+          if (!allowedTags.has(tagName)) {
+            if (tagName === 'script' || tagName === 'style') return null;
+            const frag = document.createDocumentFragment();
+            Array.from(element.childNodes).forEach(c => {
+              const s = sanitizeNode(c);
+              if (s) frag.appendChild(s);
+            });
+            return frag;
+          }
+
+          if (tagName === 'a') {
+            const href = element.getAttribute('href') || '';
+            if (href.match(/^(javascript|data|vbscript):/i)) {
+              const frag = document.createDocumentFragment();
+              Array.from(element.childNodes).forEach(c => {
+                const s = sanitizeNode(c);
+                if (s) frag.appendChild(s);
+              });
+              return frag;
+            }
+          }
+
+          const clean = document.createElement(tagName);
+          ['class', 'style', 'href', 'target', 'rel', 'colspan', 'rowspan'].forEach(attr => {
+            if (element.hasAttribute(attr)) {
+              clean.setAttribute(attr, element.getAttribute(attr));
+            }
+          });
+
+          Array.from(element.childNodes).forEach(c => {
+            const s = sanitizeNode(c);
+            if (s) clean.appendChild(s);
+          });
+          return clean;
+        }
+
+        const cleanBody = document.createElement('body');
+        Array.from(doc.body.childNodes).forEach(c => {
+          const s = sanitizeNode(c);
+          if (s) cleanBody.appendChild(s);
+        });
+        return cleanBody.innerHTML;
+      }
+
+      function autoLinkHtml(html, currentTermId) {
+        if (!html) return '';
+        const sanitized = sanitizeHtml(html);
+        if (!includeAutoLinks) return sanitized;
+
+        const engine = buildTermMatchingEngine();
+        if (!engine) return sanitized;
+
+        const { termMap, regex } = engine;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(sanitized, 'text/html');
+
+        function processNode(node) {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const tagName = node.tagName.toLowerCase();
+            if (tagName === 'a' || tagName === 'script' || tagName === 'style') return;
+            Array.from(node.childNodes).forEach(processNode);
+          } else if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.nodeValue;
+            if (!text) return;
+
+            const matches = Array.from(text.matchAll(regex));
+            if (matches.length > 0) {
+              const frag = document.createDocumentFragment();
+              let lastIdx = 0;
+
+              for (const match of matches) {
+                const matchText = match[1] || '';
+                const matchStart = match.index;
+                const matchedTerm = termMap.get(matchText.toLowerCase());
+
+                if (matchStart > lastIdx) {
+                  frag.appendChild(document.createTextNode(text.substring(lastIdx, matchStart)));
+                }
+
+                if (matchedTerm && matchedTerm.id !== currentTermId) {
+                  const a = document.createElement('a');
+                  a.href = '#' + encodeURIComponent(matchedTerm.name);
+                  a.textContent = matchText;
+                  frag.appendChild(a);
+                } else {
+                  frag.appendChild(document.createTextNode(matchText));
+                }
+
+                lastIdx = matchStart + matchText.length;
+              }
+
+              if (lastIdx < text.length) {
+                frag.appendChild(document.createTextNode(text.substring(lastIdx)));
+              }
+
+              node.parentNode.replaceChild(frag, node);
+            }
+          }
+        }
+
+        Array.from(doc.body.childNodes).forEach(processNode);
+        return doc.body.innerHTML;
+      }
+
+      function renderCards(matchingTerms) {
+        welcomeView.style.display = 'none';
+        detailView.style.display = 'block';
+        detailView.innerHTML = '';
+        if (contentPane) contentPane.scrollTop = 0;
+
+        matchingTerms.forEach(term => {
+          const card = document.createElement('div');
+          card.className = 'detail-card';
+
+          const taxonomyPath = getTaxonomyBreadcrumbs(term);
+          let breadcrumbHtml = '';
+          if (taxonomyPath.length > 0) {
+            const links = taxonomyPath.map(p => '<a href="#' + encodeURIComponent(p.name) + '">' + escapeHtml(p.name) + '</a>');
+            breadcrumbHtml = '<div class="breadcrumb"><span>Taxonomy:</span> ' + links.join(' <span class="breadcrumb-sep">&gt;</span> ') + ' <span class="breadcrumb-sep">&gt;</span> <strong>' + escapeHtml(term.name) + '</strong></div>';
+          }
+
+          // Sub-Concepts section with rich cards (hidden if empty)
+          const children = getChildTerms(term.id);
+          let childTermsHtml = '';
+          if (children.length > 0) {
+            const childCards = children.map(c => {
+              const desc = c.description ? '<div class="subconcept-desc">' + escapeHtml(c.description) + '</div>' : '';
+              return `
+                <a href="#${encodeURIComponent(c.name)}" class="subconcept-card">
+                  <div class="subconcept-header">
+                    <span class="subconcept-name">${escapeHtml(c.name)}</span>
+                    <span class="subconcept-arrow">&rarr;</span>
+                  </div>
+                  ${desc}
+                </a>
+              `;
+            }).join('');
+
+            childTermsHtml = `
+              <div class="section-title">Sub-Concepts</div>
+              <div class="subconcepts-grid">${childCards}</div>
+            `;
+          }
+
+          // Unified Relationships list without Outgoing/Incoming section labels (hidden if empty)
+          let relationsHtml = '';
+          if (term.relations && term.relations.length > 0) {
+            const items = term.relations.map(r => {
+              const isSource = r.sourceId === term.id;
+              const relName = escapeHtml(r.relationName || 'relates to');
+              const desc = r.description ? '<div class="relation-desc">' + escapeHtml(r.description) + '</div>' : '';
+
+              const leftSide = isSource
+                ? '<strong>' + escapeHtml(r.sourceName) + '</strong>'
+                : '<a href="#' + encodeURIComponent(r.sourceName) + '">' + escapeHtml(r.sourceName) + '</a>';
+
+              const rightSide = !isSource
+                ? '<strong>' + escapeHtml(r.targetName) + '</strong>'
+                : '<a href="#' + encodeURIComponent(r.targetName) + '">' + escapeHtml(r.targetName) + '</a>';
+
+              return `
+                <li>
+                  ${leftSide}
+                  <span class="relation-pill">${relName}</span>
+                  <span class="relation-dir-icon">&rarr;</span>
+                  ${rightSide}
+                  ${desc}
+                </li>
+              `;
+            }).join('');
+
+            relationsHtml = `
+              <div class="section-title">Relationships</div>
+              <ul class="relations-list">${items}</ul>
+            `;
+          }
+
+          let xFieldsHtml = '';
+          if (term.xFields && term.xFields.length > 0) {
+            const items = term.xFields.map(f => `
+              <div class="meta-card">
+                <div class="meta-label">${escapeHtml(f.name)}</div>
+                <div class="meta-value">${escapeHtml(String(f.value))}</div>
+              </div>
+            `).join('');
+
+            xFieldsHtml = `
+              <div class="section-title">Metadata</div>
+              <div class="meta-grid">${items}</div>
+            `;
+          }
+
+          let addInfoHtml = '';
+          if (term.additionalInformation) {
+            addInfoHtml = `
+              <div class="section-title">Additional Information</div>
+              <div class="term-description">${autoLinkHtml(term.additionalInformation, term.id)}</div>
+            `;
+          }
+
+          const termTypeLower = (term.type || '').toLowerCase();
+          const isStandardTerm = termTypeLower === 'term' && !profileColors[term.type];
+          const badgeStyle = profileColors[term.type] ? 'background:' + profileColors[term.type] + ';color:#fff;' : '';
+          const badgeHtml = !isStandardTerm ? '<span class="type-badge" style="' + badgeStyle + '">' + escapeHtml(term.type) + '</span>' : '';
+
+          card.innerHTML = `
+            ${breadcrumbHtml}
+            <div class="detail-header">
+              <div>
+                <h1 class="detail-title">${escapeHtml(term.name)}</h1>
+                ${badgeHtml}
+              </div>
+              <div class="card-actions">
+                <button class="btn-card-action btn-copy-md">Copy Markdown</button>
+                <button class="btn-card-action btn-copy-link">Copy Link</button>
+              </div>
+            </div>
+
+            <!-- Definition text cleanly below term name -->
+            <div class="definition-clean">${autoLinkText(term.description, term.id) || '<em style="color:var(--text-muted);">No description provided.</em>'}</div>
+
+            ${term.synonyms ? '<div class="section-title">Synonyms</div><p style="color:var(--text-secondary);"> ' + escapeHtml(term.synonyms) + '</p>' : ''}
+            ${addInfoHtml}
+            ${xFieldsHtml}
+            ${childTermsHtml}
+            ${relationsHtml}
+          `;
+
+          // Button event listeners
+          const copyBtn = card.querySelector('.btn-copy-link');
+          if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+              const linkUrl = window.location.origin + window.location.pathname + '#' + encodeURIComponent(term.name);
+              navigator.clipboard.writeText(linkUrl);
+              copyBtn.textContent = 'Copied!';
+              setTimeout(() => copyBtn.textContent = 'Copy Link', 2000);
+            });
+          }
+
+          function htmlToMarkdown(html) {
+            if (!html) return '';
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            function nodeToMd(node) {
+              if (node.nodeType === Node.TEXT_NODE) {
+                return node.nodeValue || '';
+              }
+              if (node.nodeType !== Node.ELEMENT_NODE) {
+                return '';
+              }
+              const tag = node.tagName.toLowerCase();
+              const childrenMd = Array.from(node.childNodes).map(nodeToMd).join('');
+
+              switch (tag) {
+                case 'h1': return '\n# ' + childrenMd.trim() + '\n\n';
+                case 'h2': return '\n## ' + childrenMd.trim() + '\n\n';
+                case 'h3': return '\n### ' + childrenMd.trim() + '\n\n';
+                case 'h4': return '\n#### ' + childrenMd.trim() + '\n\n';
+                case 'h5': return '\n##### ' + childrenMd.trim() + '\n\n';
+                case 'h6': return '\n###### ' + childrenMd.trim() + '\n\n';
+                case 'p': return '\n' + childrenMd.trim() + '\n\n';
+                case 'br': return '\n';
+                case 'strong':
+                case 'b': return '**' + childrenMd + '**';
+                case 'em':
+                case 'i': return '*' + childrenMd + '*';
+                case 'u': return '_' + childrenMd + '_';
+                case 's': return '~~' + childrenMd + '~~';
+                case 'code': return String.fromCharCode(96) + childrenMd + String.fromCharCode(96);
+                case 'pre': {
+                  const b = String.fromCharCode(96).repeat(3);
+                  return '\n' + b + '\n' + childrenMd.trim() + '\n' + b + '\n\n';
+                }
+                case 'blockquote': return '\n> ' + childrenMd.trim().replace(/\n/g, '\n> ') + '\n\n';
+                case 'a': {
+                  const href = node.getAttribute('href');
+                  return href ? '[' + childrenMd + '](' + href + ')' : childrenMd;
+                }
+                case 'ul': return '\n' + childrenMd + '\n';
+                case 'ol': return '\n' + childrenMd + '\n';
+                case 'li': return '- ' + childrenMd.trim() + '\n';
+                default: return childrenMd;
+              }
+            }
+
+            const res = nodeToMd(doc.body).replace(/\n{3,}/g, '\n\n').trim();
+            return res;
+          }
+
+          const copyMdBtn = card.querySelector('.btn-copy-md');
+          if (copyMdBtn) {
+            copyMdBtn.addEventListener('click', () => {
+              let md = '# ' + term.name + ' [' + term.type + ']\n\n';
+              if (term.description) md += '## Definition\n' + term.description + '\n\n';
+              if (term.synonyms) md += '## Synonyms\n' + term.synonyms + '\n\n';
+              if (term.additionalInformation) md += '## Additional Info\n' + htmlToMarkdown(term.additionalInformation) + '\n\n';
+              if (term.xFields && term.xFields.length > 0) {
+                md += '## Metadata\n';
+                term.xFields.forEach(f => md += '- **' + f.name + '**: ' + f.value + '\n');
+                md += '\n';
+              }
+              if (term.relations && term.relations.length > 0) {
+                md += '## Relationships\n';
+                term.relations.forEach(r => {
+                  md += '- ' + r.sourceName + ' ' + r.relationName + ' ' + r.targetName + (r.description ? ' (' + r.description + ')' : '') + '\n';
+                });
+              }
+              navigator.clipboard.writeText(md.trim());
+              copyMdBtn.textContent = 'Copied MD!';
+              setTimeout(() => copyMdBtn.textContent = 'Copy Markdown', 2000);
+            });
+          }
+
+          detailView.appendChild(card);
+        });
+      }
+
+      function wildcardToRegExp(pattern) {
+        if (!pattern) return /^$/i;
+        const escapeChar = pattern.replace(/[.+^${}()|[]\]/g, '\$&');
+        const regexStr = '^' + escapeChar.replace(/\?/g, '.').replace(/\*/g, '.*') + '$';
+        return new RegExp(regexStr, 'i');
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      // Handle Hash Routing & Matching
+      function handleHashChange() {
+        const rawHash = window.location.hash ? window.location.hash.substring(1) : '';
+        if (!rawHash) {
+          activeTermIds.clear();
+          renderSidebar();
+          welcomeView.style.display = 'block';
+          detailView.style.display = 'none';
+          return;
+        }
+
+        const decoded = decodeURIComponent(rawHash).trim();
+        const query = decoded.startsWith('term-') ? decoded.substring(5) : decoded;
+
+        let matcher;
+        try {
+          matcher = wildcardToRegExp(query);
+        } catch (e) {
+          matcher = wildcardToRegExp(escapeRegex(query));
+        }
+
+        // Find terms matching wildcard pattern on name or ID
+        const matches = data.filter(t => {
+          const lowerDecoded = decoded.toLowerCase();
+          return matcher.test(t.name) || matcher.test(t.id) || t.id.toLowerCase() === lowerDecoded;
+        });
+
+        if (matches.length > 0) {
+          activeTermIds = new Set(matches.map(m => m.id));
+          renderSidebar();
+          renderCards(matches);
+          document.body.setAttribute('data-mobile-screen', 'detail');
+        } else {
+          activeTermIds.clear();
+          renderSidebar();
+          welcomeView.style.display = 'block';
+          welcomeView.innerHTML = '<h3>No terms found</h3><p>No terms matched "' + escapeHtml(decoded) + '".</p>';
+          detailView.style.display = 'none';
+          document.body.setAttribute('data-mobile-screen', 'detail');
+        }
+      }
+
+      window.addEventListener('hashchange', handleHashChange);
+      
+      // Init
+      renderSidebar();
+      if (window.location.hash) {
+        handleHashChange();
+      } else {
+        document.body.setAttribute('data-mobile-screen', 'index');
+      }
+    })();
+  </script>
+</body>
+</html>
